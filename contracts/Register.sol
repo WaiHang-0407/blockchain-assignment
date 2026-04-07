@@ -9,11 +9,13 @@ contract Register {
     }
 
     mapping(address => User) private users;
+    mapping(string => address) private usernameToAddress;
 
     event UserRegistered(address indexed userAddress, string username);
 
     function register(string memory _username) public {
-        require(!users[msg.sender].isRegistered, "Already registered");
+        require(!users[msg.sender].isRegistered, "Wallet already registered");
+        require(usernameToAddress[_username] == address(0), "Username already taken");
 
         users[msg.sender] = User({
             username: _username,
@@ -21,8 +23,11 @@ contract Register {
             isRegistered: true
         });
 
+        usernameToAddress[_username] = msg.sender;
+
         emit UserRegistered(msg.sender, _username);
     }
+
 
     function isUserRegistered(address _user) public view returns (bool) {
         return users[_user].isRegistered;
@@ -35,7 +40,7 @@ contract Register {
 
     function login() public view returns (string memory) {
         require(users[msg.sender].isRegistered, "Not registered");
-        return string(abi.encodePacked("Welcome back, ", users[msg.sender].username));
+        return string.concat("Welcome back, ", users[msg.sender].username);
     }
 }
 
