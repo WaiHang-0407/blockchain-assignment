@@ -9,25 +9,21 @@ contract Register {
     }
 
     mapping(address => User) private users;
-    mapping(string => address) private usernameToAddress;
+    mapping(string => address) private usernameToAddress; // NEW mapping
 
     event UserRegistered(address indexed userAddress, string username);
 
     function register(string memory _username) public {
-        require(!users[msg.sender].isRegistered, "Wallet already registered");
-        require(usernameToAddress[_username] == address(0), "Username already taken");
-
         users[msg.sender] = User({
             username: _username,
             userAddress: msg.sender,
             isRegistered: true
         });
 
-        usernameToAddress[_username] = msg.sender;
+        usernameToAddress[_username] = msg.sender; // store username → wallet
 
         emit UserRegistered(msg.sender, _username);
     }
-
 
     function isUserRegistered(address _user) public view returns (bool) {
         return users[_user].isRegistered;
@@ -43,4 +39,3 @@ contract Register {
         return string.concat("Welcome back, ", users[msg.sender].username);
     }
 }
-
