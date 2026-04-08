@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+    <div class="card">
+        <h2>User Registration</h2>
+        <p class="subtitle">Connect your wallet and choose a username</p>
+        <input type="text" id="username" placeholder="Enter username" />
+        <button onclick="registerUser()">Register</button>
+        <p id="status"></p>
+        <div class="login-link">
+            <a href="/html/login.html">Already have an account?</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    
+    <script>
+        const ABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "userAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			}
+		],
+		"name": "UserRegistered",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "getUser",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "isUserRegistered",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "login",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_username",
+				"type": "string"
+			}
+		],
+		"name": "register",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+        
+        const Address = "0x9369C79E57cc42E87204Dc0a3392e580195e10b7";
+
+        let web3;
+        let contract;
+        let currentAccount;
+
+        async function connectContract() {
+          if (!window.ethereum) {
+            document.getElementById("status").innerText = "MetaMask not detected!";
+            return;
+          }
+          web3 = new Web3(window.ethereum);
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          currentAccount = accounts[0];
+          contract = new web3.eth.Contract(ABI, Address);
+        }
+
+        async function registerUser() {
+          await connectContract();
+          const username = document.getElementById("username").value;
+
+          if (!username) {
+            document.getElementById("status").innerText = "Please enter a username!";
+            return;
+          }
+
+          try {
+            await contract.methods.register(username).send({
+              from: currentAccount,
+              gas: 3000000
+            });
+            document.getElementById("status").innerText = "Registered successfully!";
+            setTimeout(() => { window.location.href = "/html/login.html"; }, 1500);
+          } catch (err) {
+            console.error(err);
+            document.getElementById("status").innerText = "Transaction failed!";
+          }
+        }
+    </script>
+</body>
+</html>

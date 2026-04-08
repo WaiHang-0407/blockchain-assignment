@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Login</title>
+  <link rel="stylesheet" type="text/css" href="/css/login.css">
+</head>
+<body>
+  <div class="card">
+    <h2>User Login</h2>
+    <p class="subtitle">Connect your wallet to continue</p>
+    <button onclick="loginUser()">Login with MetaMask</button>
+    <p id="status"></p>
+    <div class="register-link">
+      <a href="/html/register.html">Don’t have an account? Register here</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <script>
+    let web3;
+    let contract;
+    const ABI = [ /* your ABI here */ ];
+    const Address = "0xYourContractAddress";
+
+    async function connectContract() {
+      if (!window.ethereum) {
+        document.getElementById("status").innerText = "MetaMask not detected!";
+        return;
+      }
+      web3 = new Web3(window.ethereum);
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      contract = new web3.eth.Contract(ABI, Address);
+      return accounts[0];
+    }
+
+    async function loginUser() {
+      const account = await connectContract();
+      try {
+        const isRegistered = await contract.methods.isUserRegistered(account).call();
+        if (isRegistered) {
+          const user = await contract.methods.getUser(account).call();
+          document.getElementById("status").innerText = "Welcome back, " + user[0];
+        } else {
+          document.getElementById("status").innerText = "No account found. Please register first.";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
