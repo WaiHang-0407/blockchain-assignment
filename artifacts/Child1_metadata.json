@@ -1,0 +1,107 @@
+{
+	"compiler": {
+		"version": "0.8.31+commit.fd3a2265"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_parent1ContractAddress",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [],
+				"name": "getValueFromChild",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "parent1Contract",
+				"outputs": [
+					{
+						"internalType": "contract Parent1Interface",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_a",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_b",
+						"type": "uint256"
+					}
+				],
+				"name": "setValueFromChild",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Child1.sol": "Child1"
+		},
+		"evmVersion": "osaka",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Child1.sol": {
+			"keccak256": "0x0bba6703e7372df62e0e54b540bf75193e2a27e865f3bebe015a15a9afce0836",
+			"urls": [
+				"bzz-raw://70f89753990c8495024b19defc8c40ba570d7285aa67db48bbf18f1b23079da1",
+				"dweb:/ipfs/QmV7th3Qjpb45644AT2Cv2AZtTJmkv3MXtNVbrmtchmi84"
+			]
+		},
+		"Parent1.sol": {
+			"keccak256": "0xe9e6cb77c98321086a5a271b28d8a4a16aa9a363d4eab112316b4858ca9016f2",
+			"urls": [
+				"bzz-raw://6e5c2189a7981460ed8e4f47250604c2486a2f6b228383cc1f40578d36fdce08",
+				"dweb:/ipfs/QmZfbbDp7Edj58Y7hEnr5aaifWY4NcJ4mvcXNjX5LfUate"
+			]
+		}
+	},
+	"version": 1
+}

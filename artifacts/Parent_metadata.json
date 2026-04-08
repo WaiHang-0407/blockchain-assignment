@@ -1,0 +1,63 @@
+{
+	"compiler": {
+		"version": "0.8.31+commit.fd3a2265"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_a",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_b",
+						"type": "uint256"
+					}
+				],
+				"name": "setValue",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Parent.sol": "Parent"
+		},
+		"evmVersion": "osaka",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Parent.sol": {
+			"keccak256": "0x24a1c1dec31f0ae47fa05b1d528716b646f0a248340d3f25e2385b30d9c90445",
+			"urls": [
+				"bzz-raw://7c073e0d30abaf700e42d6cc402a8450b514c54bb967a07821932a49666db8ef",
+				"dweb:/ipfs/QmQvfkRr71ZgNKb12d6MR4hGSSp3iGbavxB333gPPqJDbB"
+			]
+		}
+	},
+	"version": 1
+}

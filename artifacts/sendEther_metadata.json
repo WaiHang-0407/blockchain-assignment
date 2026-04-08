@@ -1,0 +1,59 @@
+{
+	"compiler": {
+		"version": "0.8.31+commit.fd3a2265"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address payable",
+						"name": "toReceiver",
+						"type": "address"
+					}
+				],
+				"name": "send",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"errorEther.sol": "sendEther"
+		},
+		"evmVersion": "osaka",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"errorEther.sol": {
+			"keccak256": "0x5911f84f821365a3ae736b607ab013ebd3a3de38ba437e3b757015f16f15ebf1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0948fe50b88045a668c5a74b217d2160e57003dff94e2c021c1f3b838731975c",
+				"dweb:/ipfs/QmNWvPXNNwfrQYZY82S6A2W81ERXxmu3m755rnFmwxwA4f"
+			]
+		}
+	},
+	"version": 1
+}

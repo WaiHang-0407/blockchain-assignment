@@ -1,0 +1,65 @@
+{
+	"compiler": {
+		"version": "0.8.31+commit.fd3a2265"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "epochTime",
+						"type": "uint256"
+					}
+				],
+				"name": "daysSince",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"day.sol": "DayCounter"
+		},
+		"evmVersion": "osaka",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"day.sol": {
+			"keccak256": "0x790d60d4870d357ab2300050e2844fc48d3d76e35e2443180e8a0c2320a7df6b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://66c69a7793a1f98cd2c823026e2b351615a4381b7458915db43c0dd6eaaf062f",
+				"dweb:/ipfs/QmSvsgCLvCut4iPkMHNyYh9CWxqqeDzz2fZRfo5SYRt3EN"
+			]
+		}
+	},
+	"version": 1
+}
