@@ -73,6 +73,25 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_username",
+						"type": "string"
+					}
+				],
+				"name": "isUsernameRegistered",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "login",
 				"outputs": [
@@ -112,7 +131,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/UserAuth.sol": "Register"
+			"contracts/UserAuth.sol": "UserAuth"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -129,11 +148,11 @@
 	},
 	"sources": {
 		"contracts/UserAuth.sol": {
-			"keccak256": "0xf1fea95bafefcc06176a4512063d32955b054ff7f91ecfcf3ae3c3be74b579a5",
+			"keccak256": "0xdb2f696905ff68e89305b99f453e985d9d30c989b4d89424f882b760845a2e0b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://eb1a93f9793167736e17e2936406ae918620cefaa0ee303b06655b3c3f679598",
-				"dweb:/ipfs/QmTjFjGH9qkXbmTUr8MsLgnPTrPQuARiqFye7AdnG1NTYM"
+				"bzz-raw://b23c583029926fb7ecbdd2a9a153d3cb046a003fbf36ff72691492d0594c2823",
+				"dweb:/ipfs/QmdB2o51a1ZnNYqCNRBnDWo3okJnxZsmeih9sJSUyuL8MW"
 			]
 		}
 	},

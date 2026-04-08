@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Register {
+contract UserAuth {
     struct User {
         string username;
         address userAddress;
@@ -27,6 +27,10 @@ contract Register {
 
     function isUserRegistered(address _user) public view returns (bool) {
         return users[_user].isRegistered;
+    }
+
+    function isUsernameRegistered(string memory _username) public view returns (bool) {
+        return usernameToAddress[_username] != address(0);
     }
 
     function getUser(address _user) public view returns (string memory, address, bool) {

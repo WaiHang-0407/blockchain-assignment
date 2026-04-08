@@ -112,7 +112,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/UserAuth.sol": "Register"
+			"contracts/UserAuth.sol": "U"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -129,11 +129,11 @@
 	},
 	"sources": {
 		"contracts/UserAuth.sol": {
-			"keccak256": "0xf1fea95bafefcc06176a4512063d32955b054ff7f91ecfcf3ae3c3be74b579a5",
+			"keccak256": "0x24f0a3e8efa8ed453c0f096898d301d7aa4c755b37d844f2e3681028616229ec",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://eb1a93f9793167736e17e2936406ae918620cefaa0ee303b06655b3c3f679598",
-				"dweb:/ipfs/QmTjFjGH9qkXbmTUr8MsLgnPTrPQuARiqFye7AdnG1NTYM"
+				"bzz-raw://c52065cbb519b88303c464aeea97434e88b0ecdb46b71467066129c26183bee5",
+				"dweb:/ipfs/QmQtiDcRHH6rwYKB8g9d2Li567cXgiGwyX4iBYYEhSX5DP"
 			]
 		}
 	},
