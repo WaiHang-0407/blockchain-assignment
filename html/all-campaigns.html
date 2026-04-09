@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Active Campaigns</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/all-campaigns.css">
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div class="container">
+        <h2 class="page-title">Active Campaigns</h2>
+        <div id="campaignList" class="campaign-grid"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script>
+        const ABI = [
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "title",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "goal",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "deadline",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "CampaignCreated",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "campaignCount",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "campaigns",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "title",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "goal",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "deadline",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "fundsRaised",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isWithdrawn",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_title",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "_description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_goal",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_deadline",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "createCampaign",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getActiveCampaigns",
+                "outputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "creator",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "title",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "description",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "goal",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "deadline",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "fundsRaised",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "isWithdrawn",
+                                "type": "bool"
+                            }
+                        ],
+                        "internalType": "struct Campaign.CampaignData[]",
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+        const Address = "0x9b69dec39638c73D11dFc9a28bf0849c96e2eD89";
+
+        let web3, contract;
+
+        async function loadCampaigns() {
+            web3 = new Web3(window.ethereum);
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+
+            contract = new web3.eth.Contract(ABI, Address);
+
+            try {
+                const count = await contract.methods.campaignCount().call();
+                console.log("Total campaigns:", count);
+
+                const campaigns = await contract.methods.getActiveCampaigns().call();
+                console.log("Active campaigns:", campaigns);
+
+                const listDiv = document.getElementById("campaignList");
+                listDiv.innerHTML = "";
+
+                if (campaigns.length === 0) {
+                    listDiv.innerHTML = "<p>No active campaigns found</p>";
+                    return;
+                }
+
+                campaigns.forEach(c => {
+                    console.log("Campaign:", c);
+
+                    const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
+
+                    const card = `
+            <div class="campaign-card">
+              <h3>${c.title}</h3>
+              <p>${c.description}</p>
+              <p><strong>Goal:</strong> ${c.goal} Wei</p>
+              <p><strong>Deadline:</strong> ${deadlineDate}</p>
+              <p><strong>Creator:</strong> ${c.creator}</p>
+            </div>
+          `;
+                    listDiv.innerHTML += card;
+                });
+
+            } catch (err) {
+                console.error("Error loading campaigns:", err);
+                document.getElementById("campaignList").innerText = "Failed to load campaigns!";
+            }
+        }
+
+        function viewCampaign(id) {
+            // Redirect to a campaign details page
+            window.location.href = `/html/campaign-details.html?id=${id}`;
+        }
+
+        window.addEventListener("load", loadCampaigns);
+
+        fetch("/html/navbar.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading navbar:", err));
+    </script>
+</body>
+
+</html>

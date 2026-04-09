@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>User Registration</title>
-    <link rel="stylesheet" href="/css/register.css">
-</head>
-<body>
-    <div class="card">
-        <h2>User Registration</h2>
-        <p class="subtitle">Connect your wallet and choose a username</p>
-        <input type="text" id="username" placeholder="Enter username" />
-        <button onclick="registerUser()">Register</button>
-        <p id="status"></p>
-        <div class="login-link">
-            <a href="/html/login.html">Already have an account?</a>
-        </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-    
-    <script>
-        const ABI = [
+<head>
+  <title>User Registration</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/register.css">
+</head>
+
+<body>
+  <div id="navbar"></div>
+
+  <div class="card">
+    <h2>User Registration</h2>
+    <p class="subtitle">Connect your wallet and choose a username</p>
+    <input type="text" id="username" placeholder="Enter username" />
+    <button id="registerButton" onclick="registerUser()">Register</button>
+    <p id="status"></p>
+    <div class="login-link">
+      <a href="/html/login.html">Already have an account?</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+
+  <script>
+    const ABI = [
   {
     "inputs": [
       {
@@ -133,54 +138,62 @@
     "type": "function"
   }
 ];
-        
-        const Address = "0xd2799679753Cd792C18610e5F696aD03dd4EAEe2";
 
-        let web3;
-        let contract;
-        let currentAccount;
+    const Address = "0x2fe851cDb6b1D03E4Ac422E01411C8D413a633E5";
 
-        // Connect to MetaMask and set up contract instance
-        async function connectContract() {
-          if (!window.ethereum) {
-            document.getElementById("status").innerText = "MetaMask not detected!";
-            return;
-          }
-          web3 = new Web3(window.ethereum);
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-          currentAccount = accounts[0];
-          contract = new web3.eth.Contract(ABI, Address);
+    let web3;
+    let contract;
+    let currentAccount;
+
+    // Connect to MetaMask and set up contract instance
+    async function connectContract() {
+      if (!window.ethereum) {
+        document.getElementById("status").innerText = "MetaMask not detected!";
+        return;
+      }
+      web3 = new Web3(window.ethereum);
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      currentAccount = accounts[0];
+      contract = new web3.eth.Contract(ABI, Address);
+    }
+
+    // Register user function
+    async function registerUser() {
+      await connectContract();
+      const username = document.getElementById("username").value;
+
+      if (!username) {
+        document.getElementById("status").innerText = "Please enter a username!";
+        return;
+      }
+
+      try {
+        // Check if username is already taken
+        const taken = await contract.methods.isUserRegistered(currentAccount).call();
+        if (taken) {
+          document.getElementById("status").innerText = "Username already registered!";
+          return;
         }
+        // Register
+        await contract.methods.register(username).send({
+          from: currentAccount,
+          gas: 3000000
+        });
+        document.getElementById("status").innerText = "Registered successfully!";
+        setTimeout(() => { window.location.href = "/html/login.html"; }, 1500);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "Transaction failed!";
+      }
+    }
 
-        // Register user function
-        async function registerUser() {
-          await connectContract();
-          const username = document.getElementById("username").value;
-
-          if (!username) {
-            document.getElementById("status").innerText = "Please enter a username!";
-            return;
-          }
-
-          try {
-            // Check if username is already taken
-            const taken = await contract.methods.isUserRegistered(currentAccount).call();
-            if (taken) {
-              document.getElementById("status").innerText = "Username already registered!";
-              return;
-            }
-            // Register
-            await contract.methods.register(username).send({
-              from: currentAccount,
-              gas: 3000000
-            });
-            document.getElementById("status").innerText = "Registered successfully!";
-            setTimeout(() => { window.location.href = "/html/login.html"; }, 1500);
-          } catch (err) {
-            console.error(err);
-            document.getElementById("status").innerText = "Transaction failed!";
-          }
-        }
-    </script>
+    fetch("/html/navbar.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading navbar:", err));
+  </script>
 </body>
+
 </html>

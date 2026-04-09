@@ -10,55 +10,56 @@ body {
 
 .card {
     background-color: #fff;
-    padding: 40px;
+    padding: 0px 70px 50px 70px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     text-align: center;
-    width: 350px;
+    width: 400px;
 }
 
 h2 {
     margin-bottom: 10px;
     color: #333;
+    font-size: 60px;
 }
 
 p.subtitle {
     margin-top: 0;
     margin-bottom: 20px;
     color: #666;
-    font-size: 14px;
+    font-size: 30px;
 }
 
 input {
     width: 100%;
-    padding: 12px;
+    padding: 12px 20px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: 30px;
     box-sizing: border-box;
 }
 
-button {
+#registerButton {
     width: 100%;
     padding: 12px;
     background-color: #2196f3;
     color: white;
     border: none;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: 30px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     box-sizing: border-box;
 }
 
-button:hover {
+#registerButton:hover {
     background-color: #1976d2;
 }
 
 #status {
     margin-top: 15px;
-    font-size: 14px;
+    font-size: 30px;
     color: #444;
 }
 
@@ -71,4 +72,5 @@ button:hover {
     color: #2196f3;
     text-decoration: underline;
     cursor: pointer;
+    font-size: 30px;
 }

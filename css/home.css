@@ -1,0 +1,33 @@
+body {
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+.intro-section {
+    max-width: 900px;
+    margin: 100px auto 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    text-align: center;
+}
+
+.intro-section h1 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 60px;
+}
+
+.intro-section p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    font-size: 30px;
+}
+
+.highlight {
+    color: #4CAF50;
+    font-weight: bold;
+}

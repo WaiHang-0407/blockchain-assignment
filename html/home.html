@@ -1,11 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+    <title>Crowdfunding Home</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/home.css">
 </head>
+
 <body>
-    <p>home</p>
+    <div id="navbar"></div>
+
+    <div class="intro-section">
+        <h1>Welcome to <span class="highlight">FundHub</span></h1>
+        <p>
+            Crowdfunding is a process that allows individuals or organizations to raise small amounts of capital
+            from a large number of people to fund a project or venture.
+        </p>
+        <p>
+            Traditional crowdfunding platforms are centralized and often charge high fees, delay fund distribution,
+            and lack transparency in how the funds are managed.
+        </p>
+        <p>
+            A <span class="highlight">decentralized crowdfunding platform</span> can overcome these issues by using
+            blockchain technology
+            and smart contracts to ensure that funds are collected, stored, and distributed in a transparent and
+            trustless manner.
+        </p>
+        <p>
+            Our dApp enables users to create, fund, and manage crowdfunding campaigns through Ethereum smart contracts.
+            Project creators can launch campaigns, and contributors can fund them directly without intermediaries.
+        </p>
+        <p>
+            The system automatically handles goal achievements, refunds, and reward distributions through on-chain
+            logic,
+            ensuring fairness and transparency for everyone involved.
+        </p>
+    </div>
+    <script>
+        // Load navbar.html into #navbar
+        fetch("/html/navbar.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading navbar:", err));
+    </script>
 </body>
+
 </html>

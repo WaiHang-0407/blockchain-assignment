@@ -1,0 +1,119 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #000000;
+    padding: 12px 24px;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.logo-fund {
+    color: #fff;
+    /* white text */
+    background-color: #000;
+    /* black background */
+    padding: 0px 6px;
+    border-radius: 3px 0 0 3px;
+}
+
+.logo-hub {
+    color: #000;
+    /* black text */
+    background-color: #ff9900;
+    /* Pornhub orange */
+    padding: 0px 6px;
+    border-radius: 0 3px 3px 0;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 30px;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #4CAF50;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.dropbtn:hover {
+    color: #4CAF50;
+}
+
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: #fff;
+    width: auto;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    z-index: 1001;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 10px 14px;
+    text-decoration: none;
+    display: block;
+    font-size: 30px;
+}
+
+.dropdown-content a:hover {
+    background: #f0f0f0;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.nav-right button {
+    background: #4CAF50;
+    border: none;
+    padding: 0px 16px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.nav-right button:hover {
+    background: #45a049;
+}
+
+body {
+    margin: 0;
+    padding-top: 60px;
+}

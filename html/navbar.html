@@ -1,0 +1,249 @@
+<head>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" type="text/css" href="/css/navbar.css">
+</head>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/html/home.html" class="logo">
+            <span class="logo-fund">Fund</span><span class="logo-hub">Hub</span>
+        </a>
+
+        <!-- Campaigns dropdown -->
+        <div class="dropdown">
+            <button class="dropbtn">Campaign</button>
+            <div class="dropdown-content">
+                <a href="/html/all-campaigns.html">All Campaigns</a>
+                <a href="/html/create-campaign.html">Create Campaign</a>
+            </div>
+        </div>
+
+        <a href="/html/history.html" class="nav-link">History</a>
+        <a href="/html/reward.html" class="nav-link">Reward</a>
+    </div>
+
+    <div class="nav-right">
+        <button id="connectBtn" onclick="handleAuth()">Connect</button>
+    </div>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script>
+    const userAuthABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_username",
+        "type": "string"
+      }
+    ],
+    "name": "register",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "username",
+        "type": "string"
+      }
+    ],
+    "name": "UserRegistered",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getUser",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_username",
+        "type": "string"
+      }
+    ],
+    "name": "isUsernameRegistered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "isUserRegistered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "login",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+    const userAuthAddress = "0x2fe851cDb6b1D03E4Ac422E01411C8D413a633E5";
+    let web3, userAuthContract, currentAccount;
+
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert("MetaMask not detected!");
+            return;
+        }
+
+        try {
+            web3 = new Web3(window.ethereum);
+
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts"
+            });
+
+            currentAccount = accounts[0];
+            console.log("Connected:", currentAccount);
+
+            userAuthContract = new web3.eth.Contract(userAuthABI, userAuthAddress);
+
+            const registered = await userAuthContract.methods
+                .isUserRegistered(currentAccount)
+                .call();
+
+            if (!registered) {
+                window.location.href = "/html/register.html";
+            } else {
+                document.getElementById("connectBtn").innerText =
+                    shortenAddress(currentAccount);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        }
+    }
+
+    function shortenAddress(address) {
+        return address.slice(0, 6) + "..." + address.slice(-4);
+    }
+
+    window.addEventListener("load", async () => {
+        if (window.ethereum) {
+            web3 = new Web3(window.ethereum);
+            const accounts = await window.ethereum.request({ method: "eth_accounts" });
+            if (accounts.length > 0) {
+                currentAccount = accounts[0];
+                userAuthContract = new web3.eth.Contract(userAuthABI, userAuthAddress);
+
+                const registered = await userAuthContract.methods.isUserRegistered(currentAccount).call();
+                if (!registered) {
+                    window.location.href = "/html/register.html";
+                } else {
+                    document.getElementById("connectBtn").innerText = shortenAddress(currentAccount);
+                }
+            }
+        }
+    });
+
+    if (window.ethereum) {
+        window.ethereum.on("accountsChanged", async (accounts) => {
+            if (!accounts.length) {
+                currentAccount = null;
+                document.getElementById("connectBtn").innerText = "Connect";
+                return;
+            }
+
+            currentAccount = accounts[0];
+            const registered = await userAuthContract.methods.isUserRegistered(currentAccount).call();
+            if (!registered) {
+                window.location.href = "/html/register.html";
+            } else {
+                document.getElementById("connectBtn").innerText = shortenAddress(currentAccount);
+            }
+        });
+    }
+
+    async function logoutUser() {
+        try {
+            await userAuthContract.methods.logout().send({
+                from: currentAccount,
+                gas: 300000
+            });
+
+            alert("Logged out!");
+
+            document.getElementById("connectBtn").innerText = "Connect";
+            currentAccount = null;
+
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        }
+
+        async function handleAuth() {
+            if (!currentAccount) {
+                await connectWallet();
+            } else {
+                await logoutUser();
+            }
+        }
+    }
+</script>
