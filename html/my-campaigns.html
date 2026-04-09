@@ -3,17 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Active Campaigns</title>
+    <title>My Campaigns</title>
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="stylesheet" href="/css/all-campaigns.css">
+    <link rel="stylesheet" href="/css/my-campaigns.css">
 </head>
 
 <body>
     <div id="navbar"></div>
 
     <div class="container">
-        <h2 class="page-title">Active Campaigns</h2>
-        <div id="campaignList" class="campaign-grid"></div>
+        <h2 class="page-title">My Campaigns</h2>
+        <div id="myCampaignList" class="campaign-grid"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
@@ -408,49 +408,45 @@
         ];
         const Address = "0x912455f22466e9551149940D6A81B37D5C001A6F";
 
-        let web3, contract;
+        let web3, contract, currentAccount;
 
-        async function loadCampaigns() {
+        async function loadMyCampaigns() {
+            if (!window.ethereum) {
+                document.getElementById("myCampaignList").innerText = "MetaMask not detected!";
+                return;
+            }
+
             web3 = new Web3(window.ethereum);
-            await window.ethereum.request({ method: "eth_requestAccounts" });
-
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            currentAccount = accounts[0];
             contract = new web3.eth.Contract(ABI, Address);
 
             try {
-                const count = await contract.methods.campaignCount().call();
-                console.log("Total campaigns:", count);
-
-                const campaigns = await contract.methods.getActiveCampaigns().call();
-                console.log("Active campaigns:", campaigns);
-
-                const listDiv = document.getElementById("campaignList");
+                const myCampaigns = await contract.methods.getMyCampaigns(currentAccount).call();
+                const listDiv = document.getElementById("myCampaignList");
                 listDiv.innerHTML = "";
 
-                if (campaigns.length === 0) {
-                    listDiv.innerHTML = "<p>No active campaigns found</p>";
+                if (!myCampaigns.length) {
+                    listDiv.innerHTML = "<p>You haven’t created any campaigns yet.</p>";
                     return;
                 }
 
-                campaigns.forEach(c => {
-                    console.log("Campaign:", c);
-
+                myCampaigns.forEach(c => {
                     const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
-
                     const card = `
-  <div class="campaign-card" onclick="viewCampaign(${c.id})">
-    <h3>${c.title}</h3>
-    <p>${c.description}</p>
-    <p><strong>Goal:</strong> ${c.goal} Wei</p>
-    <p><strong>Deadline:</strong> ${deadlineDate}</p>
-    <p><strong>Creator:</strong> ${c.creator}</p>
-  </div>
-`;
+            <div class="campaign-card" onclick="viewCampaign(${c.id})">
+              <h3>${c.title}</h3>
+              <p>${c.description.substring(0, 80)}...</p>
+              <p><strong>Goal:</strong> ${c.goal} Wei</p>
+              <p><strong>Deadline:</strong> ${deadlineDate}</p>
+              <p><strong>Funds Raised:</strong> ${c.fundsRaised} Wei</p>
+            </div>
+          `;
                     listDiv.innerHTML += card;
                 });
-
             } catch (err) {
-                console.error("Error loading campaigns:", err);
-                document.getElementById("campaignList").innerText = "Failed to load campaigns!";
+                console.error(err);
+                document.getElementById("myCampaignList").innerText = "Failed to load campaigns!";
             }
         }
 
@@ -458,7 +454,7 @@
             window.location.href = `/html/campaign-details.html?id=${id}`;
         }
 
-        window.addEventListener("load", loadCampaigns);
+        window.addEventListener("load", loadMyCampaigns);
 
         fetch("/html/navbar.html")
             .then(response => response.text())

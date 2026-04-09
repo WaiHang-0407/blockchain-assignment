@@ -2,40 +2,29 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Create Campaign</title>
-  <link rel="stylesheet" href="/css/create-campaign.css">
-  <link rel="stylesheet" href="/css/app.css">
+    <meta charset="UTF-8">
+    <title>Campaign Details</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/campaign-details.css">
 </head>
 
 <body>
   <div id="navbar"></div>
 
-  <div class="container">
-    <h2>Create a New Campaign</h2>
-    <div class="form-group">
-      <label for="title">Campaign Title</label>
-      <input type="text" id="title" placeholder="Enter campaign title">
+  <div class="campaign-container">
+    <h2 class="page-title">Campaign Details</h2>
+    <div id="campaignDetails" class="campaign-card"></div>
+
+    <div class="contribute-section">
+      <h3>Contribute to this Campaign</h3>
+      <input type="number" id="contributionAmount" placeholder="Amount in Ether" />
+      <button onclick="contribute()">Contribute</button>
     </div>
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" placeholder="Describe your campaign"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="goal">Funding Goal (in Wei)</label>
-      <input type="number" id="goal" placeholder="e.g. 1000000000000000000">
-    </div>
-    <div class="form-group">
-      <label for="deadline">Deadline</label>
-      <input type="datetime-local" id="deadline">
-    </div>
-    <button id="launch-campaign" onclick="createCampaign()">Launch Campaign</button>
-    <p id="status"></p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-  <script>
-    const ABI = [
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script>
+        const ABI = [
   {
     "anonymous": false,
     "inputs": [
@@ -423,64 +412,57 @@
     "type": "function"
   }
 ];
-    const Address = "0x912455f22466e9551149940D6A81B37D5C001A6F";
+        const Address = "0x912455f22466e9551149940D6A81B37D5C001A6F";
 
-    let web3, contract, currentAccount;
+        let web3, contract, currentAccount;
 
-    async function connectContract() {
-      if (!window.ethereum) {
-        window.location.href = "/html/login.html"; // redirect if MetaMask not installed
-        return;
-      }
-      web3 = new Web3(window.ethereum);
-      const accounts = await window.ethereum.request({ method: "eth_accounts" });
-      if (!accounts.length) {
-        // no account connected → redirect to login
-        window.location.href = "/html/login.html";
-        return;
-      }
-      currentAccount = accounts[0];
-      contract = new web3.eth.Contract(ABI, Address);
-    }
+        const params = new URLSearchParams(window.location.search);
+        const campaignId = params.get("id");
 
-    async function createCampaign() {
-      await connectContract(); // ensures user is connected before creating
-      if (!currentAccount) return; // safety check
 
-      const title = document.getElementById("title").value;
-      const description = document.getElementById("description").value;
-      const goal = document.getElementById("goal").value;
-      const deadlineInput = document.getElementById("deadline").value;
-      const deadline = Math.floor(new Date(deadlineInput).getTime() / 1000);
+        async function loadCampaignDetails() {
+            web3 = new Web3(window.ethereum);
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            currentAccount = accounts[0];
+            contract = new web3.eth.Contract(ABI, Address);
 
-      if (!title || !description || !goal || !deadlineInput) {
-        document.getElementById("status").innerText = "Please fill in all fields!";
-        return;
-      }
+            try {
+                const c = await contract.methods.campaigns(campaignId).call();
+                const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
 
-      try {
-        await contract.methods.createCampaign(title, description, goal, deadline).send({
-          from: currentAccount,
-          gas: 3000000
-        });
-        document.getElementById("status").innerText = "Campaign created successfully!";
-        setTimeout(() => { window.location.href = "/html/all-campaigns.html"; }, 2000);
-      } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "Transaction failed!";
-      }
-    }
+                document.getElementById("campaignDetails").innerHTML = `
+      <h3>${c.title}</h3>
+      <p>${c.description}</p>
+      <p><strong>Goal:</strong> ${c.goal} Wei</p>
+      <p><strong>Funds Raised:</strong> ${c.fundsRaised} Wei</p>
+      <p><strong>Deadline:</strong> ${deadlineDate}</p>
+      <p><strong>Creator:</strong> ${c.creator}</p>
+    `;
+            } catch (err) {
+                console.error(err);
+                document.getElementById("campaignDetails").innerText = "Failed to load campaign!";
+            }
+        }
 
-    // 🔑 Run check immediately when page loads
-    window.addEventListener("load", connectContract);
+        async function contribute() {
+            const amount = document.getElementById("contributionAmount").value;
+            await contract.methods.contribute(campaignId).send({
+                from: currentAccount,
+                value: web3.utils.toWei(amount, "ether")
+            });
+            alert("Contribution successful!");
+            loadCampaignDetails(); // refresh details
+        }
 
-    fetch("/html/navbar.html")
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById("navbar").innerHTML = data;
-      })
-      .catch(err => console.error("Error loading navbar:", err));
-  </script>
+        window.addEventListener("load", loadCampaignDetails);
+
+        fetch("/html/navbar.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading navbar:", err));
+    </script>
 </body>
 
 </html>
