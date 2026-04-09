@@ -133,7 +133,7 @@
 		"compilationTarget": {
 			"contracts/UserAuth.sol": "UserAuth"
 		},
-		"evmVersion": "osaka",
+		"evmVersion": "london",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
