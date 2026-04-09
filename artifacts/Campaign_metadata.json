@@ -43,6 +43,81 @@
 				"type": "event"
 			},
 			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "campaignId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "contributor",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "ContributionMade",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "campaignId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "FundsWithdrawn",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "campaignId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "contributor",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "RefundIssued",
+				"type": "event"
+			},
+			{
 				"inputs": [],
 				"name": "campaignCount",
 				"outputs": [
@@ -104,6 +179,43 @@
 						"internalType": "bool",
 						"name": "isWithdrawn",
 						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_id",
+						"type": "uint256"
+					}
+				],
+				"name": "contribute",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "contributions",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -191,6 +303,93 @@
 				],
 				"stateMutability": "view",
 				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_creator",
+						"type": "address"
+					}
+				],
+				"name": "getMyCampaigns",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "creator",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "title",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "goal",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "deadline",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "fundsRaised",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isWithdrawn",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct Campaign.CampaignData[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_id",
+						"type": "uint256"
+					}
+				],
+				"name": "refund",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_id",
+						"type": "uint256"
+					}
+				],
+				"name": "withdraw",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
 			}
 		],
 		"devdoc": {
@@ -206,7 +405,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Crowdfunding.sol": "Campaign"
+			"contracts/Campaign.sol": "Campaign"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -222,12 +421,12 @@
 		]
 	},
 	"sources": {
-		"contracts/Crowdfunding.sol": {
-			"keccak256": "0x18972a0ad423f686fc11ca36a901c5f4d9627ba8a1148bf85b8673a5f7d3dc4a",
+		"contracts/Campaign.sol": {
+			"keccak256": "0x620db88453f83a3c0ac83455838d2bb119e04cf96622f3b5b55d7b7250841e47",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://045f27b1025c215d4daa7c41f94498b6b4b99f4b52639c993c5cd32ee9a3ed3b",
-				"dweb:/ipfs/QmbL1RBZAQSDLjfz5ZuRDvHN3ZbsuHe7Kuy33irVk3Z4Ms"
+				"bzz-raw://f3f07e7f1eb3a3bf343f7c7397e60112db7bf72ef5869776b7eb06cf0a0ada4c",
+				"dweb:/ipfs/QmfP8t8zFE7oSQijVUb2TRT5TXuU9RqogZ2WkDBnrqMsCo"
 			]
 		},
 		"contracts/UserAuth.sol": {
