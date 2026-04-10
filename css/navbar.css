@@ -70,7 +70,6 @@
     color: #4CAF50;
 }
 
-
 .dropdown-content {
     display: none;
     position: absolute;
@@ -116,4 +115,58 @@
 body {
     margin: 0;
     padding-top: 60px;
+}
+
+/* Container */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Button */
+.profile-dropbtn {
+    background: #4CAF50;
+    border: none;
+    padding: 0px 16px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* Dropdown menu */
+.profile-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    /* align to right side */
+    background-color: #fff;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    z-index: 1001;
+
+    /* 🔥 IMPORTANT for vertical layout */
+    flex-direction: column;
+}
+
+/* Each item */
+.profile-dropdown-content a {
+    display: block;
+    /* makes row by row */
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #333;
+    font-size: 30px;
+    /* reduce from 30px (too big) */
+}
+
+/* Hover effect */
+.profile-dropdown-content a:hover {
+    background-color: #f0f0f0;
+}
+
+/* Show dropdown on hover */
+.profile-dropdown:hover .profile-dropdown-content {
+    display: block;
 }

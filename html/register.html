@@ -22,128 +22,22 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-
+  <script src="/js/app.js"></script>
   <script>
-    const ABI = [
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_username",
-        "type": "string"
-      }
-    ],
-    "name": "register",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "userAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "username",
-        "type": "string"
-      }
-    ],
-    "name": "UserRegistered",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_user",
-        "type": "address"
-      }
-    ],
-    "name": "getUser",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_username",
-        "type": "string"
-      }
-    ],
-    "name": "isUsernameRegistered",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_user",
-        "type": "address"
-      }
-    ],
-    "name": "isUserRegistered",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "login",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
-    const Address = "0x2fe851cDb6b1D03E4Ac422E01411C8D413a633E5";
-
-    let web3;
     let contract;
-    let currentAccount;
+
+    fetch("/html/navbar.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+
+                const connectBtn = document.getElementById("connectBtn");
+                if (connectBtn) {
+                    connectBtn.addEventListener("click", connectWallet);
+                }
+
+                checkWalletStatus();
+            });
 
     // Connect to MetaMask and set up contract instance
     async function connectContract() {
@@ -154,7 +48,7 @@
       web3 = new Web3(window.ethereum);
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       currentAccount = accounts[0];
-      contract = new web3.eth.Contract(ABI, Address);
+      contract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
     }
 
     // Register user function
@@ -180,19 +74,12 @@
           gas: 3000000
         });
         document.getElementById("status").innerText = "Registered successfully!";
-        setTimeout(() => { window.location.href = "/html/login.html"; }, 1500);
+        setTimeout(() => { window.location.href = "/html/home.html"; }, 1500);
       } catch (err) {
         console.error(err);
         document.getElementById("status").innerText = "Transaction failed!";
       }
     }
-
-    fetch("/html/navbar.html")
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("navbar").innerHTML = data;
-            })
-            .catch(err => console.error("Error loading navbar:", err));
   </script>
 </body>
 
