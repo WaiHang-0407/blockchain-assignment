@@ -12,6 +12,7 @@ contract Campaign {
         uint deadline;
         uint fundsRaised;
         bool isWithdrawn;
+        uint createdAt;
     }
 
     uint public campaignCount;
@@ -41,7 +42,8 @@ contract Campaign {
             goal: _goal,
             deadline: _deadline,
             fundsRaised: 0,
-            isWithdrawn: false
+            isWithdrawn: false,
+            createdAt: block.timestamp
         });
         emit CampaignCreated(
             campaignCount,

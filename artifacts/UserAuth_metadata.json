@@ -25,6 +25,13 @@
 				"type": "event"
 			},
 			{
+				"inputs": [],
+				"name": "deleteAccount",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -92,19 +99,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "login",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "",
-						"type": "string"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"internalType": "string",
@@ -148,11 +142,11 @@
 	},
 	"sources": {
 		"contracts/UserAuth.sol": {
-			"keccak256": "0xdb2f696905ff68e89305b99f453e985d9d30c989b4d89424f882b760845a2e0b",
+			"keccak256": "0x9ee4b9da031240009c7081e6b3184e92ed4ae67bdae1b7479749391858ba4f66",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b23c583029926fb7ecbdd2a9a153d3cb046a003fbf36ff72691492d0594c2823",
-				"dweb:/ipfs/QmdB2o51a1ZnNYqCNRBnDWo3okJnxZsmeih9sJSUyuL8MW"
+				"bzz-raw://86736fa25bf8a2fe393f339b685a948d7c538833cac09feb6d8778305976fbd4",
+				"dweb:/ipfs/Qma2Dt9WRxgkGKxhTnAFoEsfU4nMpaVHUx4y1NHy58wxhs"
 			]
 		}
 	},

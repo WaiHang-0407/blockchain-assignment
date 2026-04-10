@@ -9,18 +9,22 @@ contract UserAuth {
     }
 
     mapping(address => User) private users;
-    mapping(string => address) private usernameToAddress; // NEW mapping
+    mapping(string => address) private usernameToAddress;
 
     event UserRegistered(address indexed userAddress, string username);
 
     function register(string memory _username) public {
+        require(!users[msg.sender].isRegistered, "Already registered");
+        require(bytes(_username).length > 0, "Username cannot be empty");
+        require(usernameToAddress[_username] == address(0), "Username already taken");
+
         users[msg.sender] = User({
             username: _username,
             userAddress: msg.sender,
             isRegistered: true
         });
 
-        usernameToAddress[_username] = msg.sender; // store username → wallet
+        usernameToAddress[_username] = msg.sender;
 
         emit UserRegistered(msg.sender, _username);
     }
@@ -38,8 +42,12 @@ contract UserAuth {
         return (u.username, u.userAddress, u.isRegistered);
     }
 
-    function login() public view returns (string memory) {
+    function deleteAccount() public {
         require(users[msg.sender].isRegistered, "Not registered");
-        return string.concat("Welcome back, ", users[msg.sender].username);
+
+        string memory username = users[msg.sender].username;
+
+        delete usernameToAddress[username];
+        delete users[msg.sender];
     }
 }

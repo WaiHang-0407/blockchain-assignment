@@ -179,6 +179,11 @@
 						"internalType": "bool",
 						"name": "isWithdrawn",
 						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -294,6 +299,11 @@
 								"internalType": "bool",
 								"name": "isWithdrawn",
 								"type": "bool"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
 							}
 						],
 						"internalType": "struct Campaign.CampaignData[]",
@@ -355,6 +365,11 @@
 								"internalType": "bool",
 								"name": "isWithdrawn",
 								"type": "bool"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
 							}
 						],
 						"internalType": "struct Campaign.CampaignData[]",
@@ -422,19 +437,19 @@
 	},
 	"sources": {
 		"contracts/Campaign.sol": {
-			"keccak256": "0x620db88453f83a3c0ac83455838d2bb119e04cf96622f3b5b55d7b7250841e47",
+			"keccak256": "0xceae9007c533a974ce5612f40e172d9194c94433e831ac78d153236e6fe3db0e",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f3f07e7f1eb3a3bf343f7c7397e60112db7bf72ef5869776b7eb06cf0a0ada4c",
-				"dweb:/ipfs/QmfP8t8zFE7oSQijVUb2TRT5TXuU9RqogZ2WkDBnrqMsCo"
+				"bzz-raw://4dc7310fb26c1a128488aed2a4c1d4f043a3e65d6afbde0a3e2f7cdda06eb9fc",
+				"dweb:/ipfs/QmQiRppi8zfEED1zLnY1NrrLPC9yNdgGxcn5XBY6SpomTX"
 			]
 		},
 		"contracts/UserAuth.sol": {
-			"keccak256": "0xdb2f696905ff68e89305b99f453e985d9d30c989b4d89424f882b760845a2e0b",
+			"keccak256": "0x9ee4b9da031240009c7081e6b3184e92ed4ae67bdae1b7479749391858ba4f66",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b23c583029926fb7ecbdd2a9a153d3cb046a003fbf36ff72691492d0594c2823",
-				"dweb:/ipfs/QmdB2o51a1ZnNYqCNRBnDWo3okJnxZsmeih9sJSUyuL8MW"
+				"bzz-raw://86736fa25bf8a2fe393f339b685a948d7c538833cac09feb6d8778305976fbd4",
+				"dweb:/ipfs/Qma2Dt9WRxgkGKxhTnAFoEsfU4nMpaVHUx4y1NHy58wxhs"
 			]
 		}
 	},
