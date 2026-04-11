@@ -11,12 +11,14 @@ contract Campaign {
         uint goal;
         uint deadline;
         uint fundsRaised;
-        bool isWithdrawn;
+        bool isWithdrawn; // true if creator withdrew funds
+        bool isRefunded; // true if refunds were issued
         uint createdAt;
     }
 
     uint public campaignCount;
     mapping(uint => CampaignData) public campaigns;
+
     event CampaignCreated(
         uint indexed id,
         address indexed creator,
@@ -24,6 +26,29 @@ contract Campaign {
         uint goal,
         uint deadline
     );
+
+    event ContributionMade(
+        uint indexed campaignId,
+        address indexed contributor,
+        uint amount
+    );
+
+    event RefundIssued(
+        uint indexed campaignId,
+        address indexed contributor,
+        uint amount
+    );
+
+    event RefundCompleted(uint indexed campaignId);
+
+    event FundsWithdrawn(
+        uint indexed campaignId,
+        address indexed creator,
+        uint amount
+    );
+
+    mapping(uint => mapping(address => uint)) public contributions;
+    mapping(uint => address[]) public campaignContributors;
 
     function createCampaign(
         string memory _title,
@@ -43,6 +68,7 @@ contract Campaign {
             deadline: _deadline,
             fundsRaised: 0,
             isWithdrawn: false,
+            isRefunded: false,
             createdAt: block.timestamp
         });
         emit CampaignCreated(
@@ -98,20 +124,18 @@ contract Campaign {
         return myCampaigns;
     }
 
-    event ContributionMade(
-        uint indexed campaignId,
-        address indexed contributor,
-        uint amount
-    );
-
-    mapping(uint => mapping(address => uint)) public contributions;
-
     function contribute(uint _id) public payable {
         CampaignData storage c = campaigns[_id];
         require(block.timestamp < c.deadline, "Campaign has ended");
         require(!c.isWithdrawn, "Funds already withdrawn");
+        require(!c.isRefunded, "Campaign refunded");
         require(msg.value > 0, "Contribution must be greater than 0");
-        require(c.fundsRaised < c.goal, "Goal already reached"); // strict version
+        require(c.fundsRaised < c.goal, "Goal already reached");
+        require(msg.sender != c.creator, "Creator cannot contribute");
+
+        if (contributions[_id][msg.sender] == 0) {
+            campaignContributors[_id].push(msg.sender);
+        }
 
         c.fundsRaised += msg.value;
         contributions[_id][msg.sender] += msg.value;
@@ -119,44 +143,44 @@ contract Campaign {
         emit ContributionMade(_id, msg.sender, msg.value);
     }
 
-    event RefundIssued(
-        uint indexed campaignId,
-        address indexed contributor,
-        uint amount
-    );
-
-    function refund(uint _id) public {
+    function finalizeCampaign(uint _id) public {
         CampaignData storage c = campaigns[_id];
         require(block.timestamp >= c.deadline, "Campaign still active");
-        require(c.fundsRaised < c.goal, "Campaign reached its goal");
+        require(!c.isWithdrawn, "Already withdrawn");
+        require(!c.isRefunded, "Already refunded");
 
-        uint contributed = contributions[_id][msg.sender];
-        require(contributed > 0, "No contributions to refund");
-
-        contributions[_id][msg.sender] = 0; // reset before transfer
-        (bool sent, ) = payable(msg.sender).call{value: contributed}("");
-        require(sent, "Refund failed");
-
-        emit RefundIssued(_id, msg.sender, contributed);
+        if (c.fundsRaised >= c.goal) {
+            // Success: do nothing here, creator must call withdraw()
+            revert("Goal met: creator must withdraw funds");
+        } else {
+            // Failure → refund contributors automatically
+            for (uint i = 0; i < campaignContributors[_id].length; i++) {
+                address contributor = campaignContributors[_id][i];
+                uint amount = contributions[_id][contributor];
+                if (amount > 0) {
+                    contributions[_id][contributor] = 0;
+                    (bool sent, ) = payable(contributor).call{value: amount}(
+                        ""
+                    );
+                    require(sent, "Refund failed");
+                    emit RefundIssued(_id, contributor, amount);
+                }
+            }
+            c.isRefunded = true;
+            emit RefundCompleted(_id);
+        }
     }
-
-    event FundsWithdrawn(
-        uint indexed campaignId,
-        address indexed creator,
-        uint amount
-    );
 
     function withdraw(uint _id) public {
         CampaignData storage c = campaigns[_id];
         require(msg.sender == c.creator, "Only creator can withdraw");
-        require(block.timestamp >= c.deadline, "Campaign not ended yet");
-        require(c.fundsRaised >= c.goal, "Goal not reached");
         require(!c.isWithdrawn, "Already withdrawn");
+        require(!c.isRefunded, "Campaign refunded");
 
+        require(c.fundsRaised >= c.goal, "Goal not met");
         c.isWithdrawn = true;
         (bool sent, ) = payable(c.creator).call{value: c.fundsRaised}("");
         require(sent, "Withdraw failed");
-
         emit FundsWithdrawn(_id, msg.sender, c.fundsRaised);
     }
 }
