@@ -67,3 +67,7 @@ body {
 .contribute-section button:hover {
     background: #45a049;
 }
+
+#statusTitle {
+    margin: 50px 0 0 0;
+}

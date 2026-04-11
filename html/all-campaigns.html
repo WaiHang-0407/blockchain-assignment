@@ -60,20 +60,40 @@
                 listDiv.innerHTML = "";
 
                 if (campaigns.length === 0) {
-                    listDiv.innerHTML = "<p>No active campaigns found</p>";
+                    listDiv.innerHTML = "<p id=\"no-campaigns\">No active campaigns found</p>";
                     return;
                 }
 
                 campaigns.forEach(c => {
+                    const createdDate = new Date(c.createdAt * 1000).toLocaleString();
                     const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
                     const goalEther = web3.utils.fromWei(c.goal.toString(), "ether");
                     const fundsRaisedEther = web3.utils.fromWei(c.fundsRaised.toString(), "ether");
 
+                    let statusText = "";
+
+                    if (Date.now() / 1000 < c.deadline) {
+                        // Deadline not yet reached
+                        statusText = `<p><em>In Progress</em></p>`;
+                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther < goalEther) {
+                        // Deadline passed, goal not met
+                        statusText = `<p><em>Refund Available</em></p>`;
+                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther >= goalEther && !c.isWithdrawn) {
+                        // Deadline passed, goal met, not withdrawn yet
+                        statusText = `<button id="withdrawBtn" onclick="withdraw(${c.id})">Withdraw</button>`;
+                    } else if (c.isWithdrawn) {
+                        // Already withdrawn
+                        statusText = `<p><em>Funds Withdrawn</em></p>`;
+                    }
+
                     const card = `
     <div class="campaign-card" onclick="viewCampaign(${c.id})">
       <h3>${c.title}</h3>
-      <p><strong>Goal:</strong> ${goalEther} ETH</p>
-      <p><strong>Deadline:</strong> ${deadlineDate}</p>
+          <p><strong>Goal:</strong> ${goalEther} ETH</p>
+          <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+          <p><strong>Created At:</strong> ${createdDate}</p>
+          <p><strong>Deadline:</strong> ${deadlineDate}</p>
+          ${statusText}
     </div>
 `;
                     listDiv.innerHTML += card;

@@ -145,8 +145,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 6px;
     z-index: 1001;
-
-    /* 🔥 IMPORTANT for vertical layout */
     flex-direction: column;
 }
 

@@ -22,8 +22,8 @@
       <textarea id="description" placeholder="Describe your campaign"></textarea>
     </div>
     <div class="form-group">
-      <label for="goal">Funding Goal (in Wei)</label>
-      <input type="number" id="goal" placeholder="e.g. 1000000000000000000">
+      <label for="goal">Funding Goal (in ETH)</label>
+      <input type="number" id="goal" placeholder="e.g. 1.5">
     </div>
     <div class="form-group">
       <label for="deadline">Deadline</label>
@@ -39,17 +39,17 @@
     let contract;
 
     fetch("/html/navbar.html")
-            .then(res => res.text())
-            .then(data => {
-                document.getElementById("navbar").innerHTML = data;
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
 
-                const connectBtn = document.getElementById("connectBtn");
-                if (connectBtn) {
-                    connectBtn.addEventListener("click", connectWallet);
-                }
+        const connectBtn = document.getElementById("connectBtn");
+        if (connectBtn) {
+          connectBtn.addEventListener("click", connectWallet);
+        }
 
-                checkWalletStatus();
-            });
+        checkWalletStatus();
+      });
 
     async function connectContract() {
       if (!window.ethereum) {
@@ -73,7 +73,9 @@
 
       const title = document.getElementById("title").value;
       const description = document.getElementById("description").value;
-      const goal = document.getElementById("goal").value;
+      const goalEth = document.getElementById("goal").value;
+      const goalWei = web3.utils.toWei(goalEth, "ether"); // convert ETH → Wei
+
       const deadlineInput = document.getElementById("deadline").value;
       const deadline = Math.floor(new Date(deadlineInput).getTime() / 1000);
 
@@ -83,7 +85,7 @@
       }
 
       try {
-        await contract.methods.createCampaign(title, description, goal, deadline).send({
+        await contract.methods.createCampaign(title, description, goalWei, deadline).send({
           from: currentAccount,
           gas: 3000000
         });

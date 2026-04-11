@@ -58,17 +58,54 @@
                 const goalEther = web3.utils.fromWei(c.goal, "ether");
 
                 document.getElementById("campaignDetails").innerHTML = `
-      <h3>${c.title}</h3>
-      <p>${c.description}</p>
-      <p><strong>Goal:</strong> ${goalEther} ETH</p>
-      <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
-      <p><strong>Created At:</strong> ${createdDate}</p>
-      <p><strong>Deadline:</strong> ${deadlineDate}</p>
-      <p><strong>Creator:</strong> ${c.creator}</p>
-    `;
+          <h3>${c.title}</h3>
+          <p>${c.description}</p>
+          <p><strong>Goal:</strong> ${goalEther} ETH</p>
+          <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+          <p><strong>Created At:</strong> ${createdDate}</p>
+          <p><strong>Deadline:</strong> ${deadlineDate}</p>
+          <p><strong>Creator:</strong> ${c.creator}</p>
+        `;
+
+                const contributeSection = document.querySelector(".contribute-section");
+
+                if (currentAccount.toLowerCase() === c.creator.toLowerCase()) {
+                    // Creator view
+                    let statusHTML = "";
+                    if (c.isWithdrawn) {
+                        statusHTML = `<p><em>Funds Withdrawn</em></p>`;
+                    } else if (parseInt(c.fundsRaised) >= parseInt(c.goal)) {
+                        statusHTML = `<button onclick="withdraw(${c.id})">Withdraw</button>`;
+                    } else if (Date.now() / 1000 < c.deadline) {
+                        statusHTML = `<p><em>In Progress</em></p>`;
+                    } else {
+                        statusHTML = `<p><em>Refunded</em></p>`;
+                    }
+                    contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3>${statusHTML}`;
+                } else {
+                    // Contributor view
+                    if (parseInt(c.fundsRaised) >= parseInt(c.goal) || Date.now() / 1000 >= c.deadline) {
+                        // Goal met OR deadline passed → no contributions allowed
+                        contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3><p><em>${parseInt(c.fundsRaised) >= parseInt(c.goal) ? "Goal Met" : "Refunded"}</em></p>`;
+                    } else {
+                        // Still active → allow contribution
+                        contributeSection.style.display = "block";
+                    }
+                }
             } catch (err) {
                 console.error(err);
                 document.getElementById("campaignDetails").innerText = "Failed to load campaign!";
+            }
+        }
+
+        async function withdraw(id) {
+            try {
+                await contract.methods.withdraw(id).send({ from: currentAccount });
+                alert("Funds withdrawn successfully!");
+                loadCampaignDetails(); // refresh
+            } catch (err) {
+                console.error(err);
+                alert("Withdrawal failed!");
             }
         }
 

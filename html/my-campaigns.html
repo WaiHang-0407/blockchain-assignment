@@ -19,7 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     <script src="/js/app.js"></script>
     <script>
-        let contract; // only declare contract, currentAccount comes from app.js
+        let contract;
 
         fetch("/html/navbar.html")
             .then(res => res.text())
@@ -58,18 +58,44 @@
                 listDiv.innerHTML = "";
 
                 if (!myCampaigns.length) {
-                    listDiv.innerHTML = "<p>You haven’t created any campaigns yet.</p>";
+                    listDiv.innerHTML = "<p id=\"no-my-campaigns\">You haven’t created any campaigns yet.</p>";
                     return;
                 }
 
                 myCampaigns.forEach(c => {
+                    const createdDate = new Date(c.createdAt * 1000).toLocaleString();
                     const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
+                    const goalEther = parseFloat(web3.utils.fromWei(c.goal.toString(), "ether"));
+                    const fundsRaisedEther = parseFloat(web3.utils.fromWei(c.fundsRaised.toString(), "ether"));
+
+                    let statusText = "";
+
+                    if (c.isRefunded) {
+                        statusText = `<p><em>Refunded</em></p>`;
+                    } else if (c.isWithdrawn) {
+                        statusText = `<p><em>Funds Withdrawn</em></p>`;
+                    } else if (fundsRaisedEther >= goalEther) {
+                        statusText = `<button class="withdrawBtn" onclick="withdraw(${c.id})">Withdraw</button>`;
+                    } else if (Date.now() / 1000 < c.deadline) {
+                        statusText = `<p><em>In Progress</em></p>`;
+                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther < goalEther) {
+                        if (c.isRefunded) {
+                            statusText = `<p><em>Refunded</em></p>`;
+                        } else {
+                            // Trigger refund automatically
+                            finalizeCampaign(c.id);
+                            statusText = `<p><em>Refund Pending...</em></p>`;
+                        }
+                    }
 
                     const card = `
         <div class="campaign-card" onclick="viewCampaign(${c.id})">
           <h3>${c.title}</h3>
-          <p><strong>Goal:</strong> ${c.goal} Wei</p>
+          <p><strong>Goal:</strong> ${goalEther} ETH</p>
+          <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+          <p><strong>Created At:</strong> ${createdDate}</p>
           <p><strong>Deadline:</strong> ${deadlineDate}</p>
+          ${statusText}
         </div>
     `;
                     listDiv.innerHTML += card;
@@ -78,6 +104,21 @@
                 console.error(err);
                 document.getElementById("myCampaignList").innerText = "Failed to load campaigns!";
             }
+
+            contract.events.RefundIssued()
+                .on("data", event => {
+                    console.log("Refund issued:", event.returnValues);
+                    alert(`Refund issued to ${event.returnValues.contributor} for ${web3.utils.fromWei(event.returnValues.amount, "ether")} ETH`);
+                    loadMyCampaigns(); // refresh UI
+                });
+
+            contract.events.FundsWithdrawn()
+                .on("data", event => {
+                    console.log("Funds withdrawn:", event.returnValues);
+                    alert(`Funds withdrawn by ${event.returnValues.creator} for ${web3.utils.fromWei(event.returnValues.amount, "ether")} ETH`);
+                    loadMyCampaigns(); // refresh UI
+                });
+
         }
 
         function viewCampaign(id) {
@@ -85,4 +126,26 @@
         }
 
         window.addEventListener("load", loadMyCampaigns);
+
+        async function withdraw(id) {
+            try {
+                await contract.methods.withdraw(id).send({ from: currentAccount });
+                alert("Funds withdrawn successfully!");
+                loadMyCampaigns(); // refresh list
+            } catch (err) {
+                console.error(err);
+                alert("Withdrawal failed!");
+            }
+        }
+
+        async function finalizeCampaign(id) {
+            try {
+                await contract.methods.finalizeCampaign(id).send({ from: currentAccount });
+                alert("Campaign finalized! Refunds issued or funds withdrawn.");
+                loadMyCampaigns(); // refresh UI
+            } catch (err) {
+                console.error(err);
+                alert("Finalization failed!");
+            }
+        }
     </script>

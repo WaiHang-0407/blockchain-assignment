@@ -35,7 +35,6 @@ body {
     overflow: hidden;
 }
 
-
 .campaign-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
@@ -61,4 +60,23 @@ body {
     display: -webkit-box;
     line-clamp: 3;
     -webkit-box-orient: vertical;
+}
+
+.withdrawBtn {
+    width: 40%;
+    padding: 5px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+#no-my-campaigns {
+    text-align: center;
+    font-size: 30px;
+    color: #777;
 }

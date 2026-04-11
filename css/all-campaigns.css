@@ -62,3 +62,9 @@ body {
     line-clamp: 3;
     -webkit-box-orient: vertical;
 }
+
+#no-campaigns {
+    text-align: center;
+    font-size: 30px;
+    color: #777;
+}
