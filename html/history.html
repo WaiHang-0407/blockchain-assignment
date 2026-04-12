@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction History</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/history.css">
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div class="history-container">
+        <h2 class="page-title">Transaction History</h2>
+        <div id="historyList" class="history-list">Loading history...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        fetch("/html/navbar.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+
+                const connectBtn = document.getElementById("connectBtn");
+                if (connectBtn) {
+                    connectBtn.addEventListener("click", connectWallet);
+                }
+
+                checkWalletStatus();
+            });
+
+        let contract;
+
+        async function loadHistory() {
+            web3 = new Web3(window.ethereum);
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            const currentAccount = accounts[0];
+            contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
+
+            // Fetch events directly tied to this account
+            const contributionEvents = await contract.getPastEvents("ContributionMade", {
+                filter: { contributor: currentAccount },
+                fromBlock: 0,
+                toBlock: "latest"
+            });
+            const refundEvents = await contract.getPastEvents("RefundIssued", {
+                filter: { contributor: currentAccount },
+                fromBlock: 0,
+                toBlock: "latest"
+            });
+            const refundCompletedEvents = await contract.getPastEvents("RefundCompleted", {
+                fromBlock: 0,
+                toBlock: "latest"
+            });
+            const withdrawEvents = await contract.getPastEvents("FundsWithdrawn", {
+                filter: { creator: currentAccount },
+                fromBlock: 0,
+                toBlock: "latest"
+            });
+            const createdEvents = await contract.getPastEvents("CampaignCreated", {
+                filter: { creator: currentAccount },
+                fromBlock: 0,
+                toBlock: "latest"
+            });
+
+            // Get campaigns created by this account
+            const myCampaigns = await contract.methods.getMyCampaigns(currentAccount).call();
+
+            // Collect contributions to your campaigns
+            let creatorContributionEvents = [];
+            for (let c of myCampaigns) {
+                const contribs = await contract.getPastEvents("ContributionMade", {
+                    filter: { campaignId: c.id },
+                    fromBlock: 0,
+                    toBlock: "latest"
+                });
+                creatorContributionEvents.push(...contribs);
+            }
+
+            // Merge everything
+            let allEvents = [
+                ...contributionEvents,
+                ...refundEvents,
+                ...refundCompletedEvents,
+                ...withdrawEvents,
+                ...createdEvents,
+                ...creatorContributionEvents
+            ];
+
+            // Sort by timestamp (latest first)
+            allEvents.sort((a, b) => b.returnValues.timestamp - a.returnValues.timestamp);
+
+            // Render
+            let html = "";
+            if (allEvents.length === 0) {
+                html = "<p>No history found.</p>";
+            } else {
+                html = "<ul class='history-items'>";
+                for (let ev of allEvents) {
+                    const ts = new Date(ev.returnValues.timestamp * 1000).toLocaleString();
+                    let line = "";
+
+                    switch (ev.event) {
+                        case "ContributionMade":
+                            const ethAmount = web3.utils.fromWei(ev.returnValues.amount, "ether");
+                            const tokenAmount = ethAmount; // 1 ETH = 1 RewardToken
+
+                            if (ev.returnValues.contributor.toLowerCase() === currentAccount.toLowerCase()) {
+                                line = `You contributed ${ethAmount} ETH to campaign #${ev.returnValues.campaignId} and earned ${tokenAmount} RewardToken(s)`;
+                            } else {
+                                line = `${ev.returnValues.contributor} contributed ${ethAmount} ETH to your campaign #${ev.returnValues.campaignId}`;
+                            }
+                            break;
+                        case "RefundIssued":
+                            line = `Refunded ${web3.utils.fromWei(ev.returnValues.amount, "ether")} ETH from campaign #${ev.returnValues.campaignId}`;
+                            break;
+                        case "RefundCompleted":
+                            line = `Campaign #${ev.returnValues.campaignId} failed to reach its goal — all contributors refunded`;
+                            break;
+                        case "FundsWithdrawn":
+                            if (ev.returnValues.creator.toLowerCase() === currentAccount.toLowerCase()) {
+                                line = `You withdrew ${web3.utils.fromWei(ev.returnValues.amount, "ether")} ETH from campaign #${ev.returnValues.campaignId}`;
+                            } else {
+                                line = `Campaign #${ev.returnValues.campaignId} reached its goal — creator withdrew ${web3.utils.fromWei(ev.returnValues.amount, "ether")} ETH`;
+                            }
+                            break;
+                        case "CampaignCreated":
+                            line = `You created campaign #${ev.returnValues.id} (${ev.returnValues.title}) with goal ${web3.utils.fromWei(ev.returnValues.goal, "ether")} ETH`;
+                            break;
+                    }
+
+                    html += `<li><span class="timestamp">${ts}</span> — <span class="event">${line}</span></li>`;
+                }
+                html += "</ul>";
+            }
+
+            document.getElementById("historyList").innerHTML = html;
+        }
+
+        window.addEventListener("load", async () => {
+            await loadHistory();
+        });
+    </script>
+</body>
+
+</html>

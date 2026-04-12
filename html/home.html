@@ -11,32 +11,34 @@
 <body>
     <div id="navbar"></div>
 
-    <div class="intro-section">
-        <h1>Welcome to <span class="highlight">FundHub</span></h1>
-        <p>
-            Crowdfunding is a process that allows individuals or organizations to raise small amounts of capital
-            from a large number of people to fund a project or venture.
-        </p>
-        <p>
-            Traditional crowdfunding platforms are centralized and often charge high fees, delay fund distribution,
-            and lack transparency in how the funds are managed.
-        </p>
-        <p>
-            A <span class="highlight">decentralized crowdfunding platform</span> can overcome these issues by using
-            blockchain technology
-            and smart contracts to ensure that funds are collected, stored, and distributed in a transparent and
-            trustless manner.
-        </p>
-        <p>
-            Our dApp enables users to create, fund, and manage crowdfunding campaigns through Ethereum smart contracts.
-            Project creators can launch campaigns, and contributors can fund them directly without intermediaries.
-        </p>
-        <p>
-            The system automatically handles goal achievements, refunds, and reward distributions through on-chain
-            logic,
-            ensuring fairness and transparency for everyone involved.
-        </p>
+    <h1 class="page-title">
+        Welcome to
+        <span class="fundhub-logo">
+            <span class="fund">Fund</span><span class="hub">Hub</span>
+        </span>
+    </h1>
+
+    <div class="cards-container">
+        <div class="card">
+            <img src="/images/transparency.png" alt="Transparency Icon" class="transparency-card-icon">
+            <h2>Transparent Funding</h2>
+            <p>All contributions and withdrawals are recorded on-chain, ensuring complete transparency for both creators
+                and contributors.</p>
+        </div>
+        <div class="card">
+            <img src="/images/fair.png" alt="Fair & Trustless Icon" class="fair-card-icon">
+            <h2>Fair & Trustless</h2>
+            <p>Smart contracts automatically handle refunds, rewards, and fund distribution without intermediaries or
+                hidden fees.</p>
+        </div>
+        <div class="card">
+            <img src="/images/community.png" alt="Community Empowered Icon" class="community-card-icon">
+            <h2>Community Empowered</h2>
+            <p>Anyone can launch or support campaigns directly, fostering a decentralized ecosystem where ideas thrive
+                through collective support.</p>
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     <script src="/js/app.js"></script>
     <script>
@@ -44,12 +46,8 @@
             .then(res => res.text())
             .then(data => {
                 document.getElementById("navbar").innerHTML = data;
-
                 const connectBtn = document.getElementById("connectBtn");
-                if (connectBtn) {
-                    connectBtn.addEventListener("click", connectWallet);
-                }
-
+                if (connectBtn) connectBtn.addEventListener("click", connectWallet);
                 checkWalletStatus();
             });
     </script>

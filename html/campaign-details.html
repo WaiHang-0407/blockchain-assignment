@@ -86,7 +86,7 @@
                     // Contributor view
                     if (parseInt(c.fundsRaised) >= parseInt(c.goal) || Date.now() / 1000 >= c.deadline) {
                         // Goal met OR deadline passed → no contributions allowed
-                        contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3><p><em>${parseInt(c.fundsRaised) >= parseInt(c.goal) ? "Goal Met" : "Refunded"}</em></p>`;
+                        contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3><p><em>${parseInt(c.fundsRaised) >= parseInt(c.goal) ? "Goal Met" : "Pending Refund"}</em></p>`;
                     } else {
                         // Still active → allow contribution
                         contributeSection.style.display = "block";
@@ -120,13 +120,6 @@
         }
 
         window.addEventListener("load", loadCampaignDetails);
-
-        fetch("/html/navbar.html")
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("navbar").innerHTML = data;
-            })
-            .catch(err => console.error("Error loading navbar:", err));
     </script>
 </body>
 

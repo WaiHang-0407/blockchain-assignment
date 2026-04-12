@@ -1,33 +1,74 @@
-body {
-    background: #f5f7fa;
-    margin: 0;
-    padding: 0;
+.page-title {
+  text-align: center;
+  font-size: 80px;
+  margin: 80px 0 20px;
 }
 
-.intro-section {
-    max-width: 900px;
-    margin: 100px auto 40px auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    padding: 40px;
-    text-align: center;
+.fundhub-logo {
+  display: inline-block;
+  margin-left: 10px;
 }
 
-.intro-section h1 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    font-size: 60px;
+.fundhub-logo .fund {
+  background-color: black;
+  color: white;
+  padding: 3px 12px;
 }
 
-.intro-section p {
-    color: #555;
-    line-height: 1.6;
-    margin-bottom: 15px;
-    font-size: 30px;
+.fundhub-logo .hub {
+  background-color: orange;
+  color: black;
+  padding: 3px 12px;
 }
 
-.highlight {
-    color: #4CAF50;
-    font-weight: bold;
+.cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin: 70px auto;
+  max-width: 1500px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 20px;
+  flex: 1;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 55px;
+}
+
+.card p {
+  color: #555;
+  font-size: 30px;
+  line-height: 1.4;
+}
+
+.transparency-card-icon {
+  width: 120px;       /* adjust size as needed */
+  height: auto;
+  margin-top: 40px;
+}
+
+.fair-card-icon {
+  width: 120px;       /* adjust size as needed */
+  height: auto;
+  margin-top: 40px;
+}
+
+.community-card-icon {
+  width: 120px;       /* adjust size as needed */
+  height: auto;
+  margin-top: 40px;
 }

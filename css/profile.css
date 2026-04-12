@@ -1,0 +1,45 @@
+body {
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    text-align: center;
+}
+
+/* Page title */
+.page-title {
+    font-size: 60px;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+/* Profile card */
+.profile-card {
+    margin-top: 20px;
+    text-align: left;
+    background-color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.profile-card p {
+    font-size: 35px;
+    margin: 20px 0;
+    line-height: 1.6;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Labels */
+.profile-card strong {
+    color: #4CAF50;
+    /* highlight green */
+    font-weight: bold;
+}

@@ -105,6 +105,17 @@
             }
         }
 
+        async function withdraw(id) {
+            try {
+                await contract.methods.withdraw(id).send({ from: currentAccount });
+                alert("Funds withdrawn successfully!");
+                loadCampaignDetails(); // refresh
+            } catch (err) {
+                console.error(err);
+                alert("Withdrawal failed!");
+            }
+        }
+
         function viewCampaign(id) {
             window.location.href = `/html/campaign-details.html?id=${id}`;
         }

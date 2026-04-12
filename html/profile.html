@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/profile.css">
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div class="profile-container">
+        <h2 class="page-title">My Profile</h2>
+        <div id="profileCard" class="profile-card">
+            <p><strong>Username:</strong> <span id="username">Loading...</span></p>
+            <p><strong>Wallet Address:</strong> <span id="address">Loading...</span></p>
+            <p><strong>ETH Balance:</strong> <span id="ethBalance">Loading...</span></p>
+            <p><strong>Reward Tokens:</strong> <span id="tokenBalance">Loading...</span></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        fetch("/html/navbar.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("navbar").innerHTML = data;
+
+                const connectBtn = document.getElementById("connectBtn");
+                if (connectBtn) {
+                    connectBtn.addEventListener("click", connectWallet);
+                }
+
+                checkWalletStatus();
+            });
+
+        async function loadProfile() {
+            // Use the global web3 from app.js
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            currentAccount = accounts[0]; // don't redeclare, just assign
+
+            // Wallet address
+            document.getElementById("address").innerText = currentAccount;
+
+            // ETH balance
+            const balanceWei = await web3.eth.getBalance(currentAccount);
+            const balanceEth = web3.utils.fromWei(balanceWei, "ether");
+            document.getElementById("ethBalance").innerText = `${balanceEth} ETH`;
+
+            // Username from UserAuth contract
+            const userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
+            try {
+                const userData = await userAuthContract.methods.getUser(currentAccount).call();
+                const username = userData[0]; // first element of the tuple
+                document.getElementById("username").innerText = username || "(no username set)";
+            } catch (err) {
+                console.error("Error fetching username:", err);
+                document.getElementById("username").innerText = "(error)";
+            }
+
+            // RewardToken balance
+            const rewardTokenContract = new web3.eth.Contract(window.rewardTokenABI, window.rewardTokenAddress);
+            const tokenBalance = await rewardTokenContract.methods.balanceOf(currentAccount).call();
+            const readableTokens = web3.utils.fromWei(tokenBalance, "ether");
+            document.getElementById("tokenBalance").innerText = `${readableTokens} CRT`;
+        }
+
+        window.addEventListener("load", loadProfile);
+    </script>
+</body>
+
+</html>
