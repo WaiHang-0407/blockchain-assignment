@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+
 import "./UserAuth.sol";
+import "./RewardToken.sol";
 
 contract Campaign {
     struct CampaignData {
@@ -11,8 +13,8 @@ contract Campaign {
         uint goal;
         uint deadline;
         uint fundsRaised;
-        bool isWithdrawn; // true if creator withdrew funds
-        bool isRefunded; // true if refunds were issued
+        bool isWithdrawn;
+        bool isRefunded;
         uint createdAt;
     }
 
@@ -24,28 +26,38 @@ contract Campaign {
         address indexed creator,
         string title,
         uint goal,
-        uint deadline
+        uint deadline,
+        uint timestamp
     );
 
     event ContributionMade(
         uint indexed campaignId,
         address indexed contributor,
-        uint amount
+        uint amount,
+        uint timestamp
     );
 
     event RefundIssued(
         uint indexed campaignId,
         address indexed contributor,
-        uint amount
+        uint amount,
+        uint timestamp
     );
 
-    event RefundCompleted(uint indexed campaignId);
+    event RefundCompleted(uint indexed campaignId, uint timestamp);
 
     event FundsWithdrawn(
         uint indexed campaignId,
         address indexed creator,
-        uint amount
+        uint amount,
+        uint timestamp
     );
+
+    RewardToken public rewardToken;
+
+    constructor(address _rewardTokenAddress) {
+        rewardToken = RewardToken(_rewardTokenAddress);
+    }
 
     mapping(uint => mapping(address => uint)) public contributions;
     mapping(uint => address[]) public campaignContributors;
@@ -76,7 +88,8 @@ contract Campaign {
             msg.sender,
             _title,
             _goal,
-            _deadline
+            _deadline,
+            block.timestamp
         );
     }
 
@@ -140,7 +153,7 @@ contract Campaign {
         c.fundsRaised += msg.value;
         contributions[_id][msg.sender] += msg.value;
 
-        emit ContributionMade(_id, msg.sender, msg.value);
+        emit ContributionMade(_id, msg.sender, msg.value, block.timestamp);
     }
 
     function finalizeCampaign(uint _id) public {
@@ -163,11 +176,16 @@ contract Campaign {
                         ""
                     );
                     require(sent, "Refund failed");
-                    emit RefundIssued(_id, contributor, amount);
+                    emit RefundIssued(
+                        _id,
+                        contributor,
+                        amount,
+                        block.timestamp
+                    );
                 }
             }
             c.isRefunded = true;
-            emit RefundCompleted(_id);
+            emit RefundCompleted(_id, block.timestamp);
         }
     }
 
@@ -176,11 +194,25 @@ contract Campaign {
         require(msg.sender == c.creator, "Only creator can withdraw");
         require(!c.isWithdrawn, "Already withdrawn");
         require(!c.isRefunded, "Campaign refunded");
-
         require(c.fundsRaised >= c.goal, "Goal not met");
+
         c.isWithdrawn = true;
         (bool sent, ) = payable(c.creator).call{value: c.fundsRaised}("");
         require(sent, "Withdraw failed");
-        emit FundsWithdrawn(_id, msg.sender, c.fundsRaised);
+        emit FundsWithdrawn(_id, msg.sender, c.fundsRaised, block.timestamp);
+
+        // Mint reward tokens to contributors
+        for (uint i = 0; i < campaignContributors[_id].length; i++) {
+            address contributor = campaignContributors[_id][i];
+            uint amount = contributions[_id][contributor];
+            if (amount > 0) {
+                // Example: 1 token per 1 wei contributed
+                rewardToken.mint(contributor, amount);
+            }
+        }
+    }
+
+    function getContributors(uint _id) public view returns (address[] memory) {
+        return campaignContributors[_id];
     }
 }
