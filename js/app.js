@@ -1,116 +1,214 @@
 let web3, userAuthContract, currentAccount;
 
 const userAuthABI = [
-    {
-        "inputs": [],
-        "name": "deleteAccount",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "_username",
-                "type": "string"
-            }
-        ],
-        "name": "register",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "userAddress",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "username",
-                "type": "string"
-            }
-        ],
-        "name": "UserRegistered",
-        "type": "event"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
-            }
-        ],
-        "name": "getUser",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            },
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            },
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "_username",
-                "type": "string"
-            }
-        ],
-        "name": "isUsernameRegistered",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
-            }
-        ],
-        "name": "isUserRegistered",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    }
+  {
+    "inputs": [],
+    "name": "deleteAccount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_username",
+        "type": "string"
+      }
+    ],
+    "name": "register",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "username",
+        "type": "string"
+      }
+    ],
+    "name": "UserRegistered",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getUser",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_username",
+        "type": "string"
+      }
+    ],
+    "name": "isUsernameRegistered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "isUserRegistered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
 ];
-const userAuthAddress = "0x310A71829866d0Bd3d516eD748949543660f3AD1";
+const userAuthAddress = "0xbb164178e053Df88226643A4351a1991f8C22600";
 
 const campaignABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_contributor",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "addContribution",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_module",
+        "type": "address"
+      }
+    ],
+    "name": "authorizeModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "autoRefund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "contribute",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "deleteCampaign",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_contributor",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "markRefunded",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
   {
     "inputs": [
       {
@@ -164,19 +262,6 @@ const campaignABI = [
     ],
     "name": "CampaignCreated",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
-    ],
-    "name": "contribute",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
   },
   {
     "anonymous": false,
@@ -233,19 +318,6 @@ const campaignABI = [
       }
     ],
     "name": "createCampaign",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
-    ],
-    "name": "finalizeCampaign",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -342,6 +414,29 @@ const campaignABI = [
     "name": "withdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "authorizedModules",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -542,6 +637,125 @@ const campaignABI = [
         "type": "uint256"
       }
     ],
+    "name": "getCampaign",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "goal",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fundsRaised",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isWithdrawn",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isRefunded",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Campaign.CampaignData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getContributor",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "contributor",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getContributorCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
     "name": "getContributors",
     "outputs": [
       {
@@ -626,6 +840,43 @@ const campaignABI = [
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "refunded",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "rewardToken",
     "outputs": [
       {
@@ -638,7 +889,7 @@ const campaignABI = [
     "type": "function"
   }
 ];
-const campaignAddress = "0x328088bC070258F9964ae1A5485Af9C74d534266";
+const campaignAddress = "0x451D9D3dF42dB6B2a003e71f372982e261A709De";
 
 const rewardTokenABI = [
   {
@@ -1053,78 +1304,214 @@ const rewardTokenABI = [
     "type": "function"
   }
 ];
-const rewardTokenAddress = "0xefFE65BC9c929104262239d88DE85751Ea0338b9";
+const rewardTokenAddress = "0x0e147c76b83f863468bC5356B196070a720d3b90";
+
+const fundingABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "contribute",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "_campaignAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "campaignId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "contributor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ContributionReceived",
+    "type": "event"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  },
+  {
+    "inputs": [],
+    "name": "campaignContract",
+    "outputs": [
+      {
+        "internalType": "contract Campaign",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+const fundingAddress = "0x8e655EbafD0f2A4567EbeC0c6b1FA2Cb11c3c337";
+
+const autoRefundABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "issueRefundToAll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "_campaignAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "campaignId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "RefundIssuedToAll",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "campaignContract",
+    "outputs": [
+      {
+        "internalType": "contract Campaign",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+const autoRefundAddress = "0xf29B32e462053108577A8e7d544EDb299d96cF89";
 
 async function connectWallet() {
-    if (!window.ethereum) {
-        alert("MetaMask not detected!");
-        return;
-    }
+  if (!window.ethereum) {
+    alert("MetaMask not detected!");
+    return;
+  }
 
-    web3 = new Web3(window.ethereum);
+  web3 = new Web3(window.ethereum);
 
-    const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts"
-    });
+  const accounts = await window.ethereum.request({
+    method: "eth_requestAccounts"
+  });
 
-    currentAccount = accounts[0];
-    console.log("Connected:", currentAccount);
+  currentAccount = accounts[0];
+  console.log("Connected:", currentAccount);
 
-    userAuthContract = new web3.eth.Contract(userAuthABI, userAuthAddress);
+  userAuthContract = new web3.eth.Contract(userAuthABI, userAuthAddress);
 
-    const registered = await userAuthContract.methods
-        .isUserRegistered(currentAccount)
-        .call();
+  const registered = await userAuthContract.methods
+    .isUserRegistered(currentAccount)
+    .call();
 
-    if (!registered) {
-        window.location.href = "/html/register.html";
-        return;
-    }
+  if (!registered) {
+    window.location.href = "/html/register.html";
+    return;
+  }
 
-    const userData = await userAuthContract.methods.getUser(currentAccount).call();
-    const username = userData[0];
+  const userData = await userAuthContract.methods.getUser(currentAccount).call();
+  const username = userData[0];
 
-    updateUI(username);
+  updateUI(username);
 }
 
 function updateUI(username) {
-    document.getElementById("connectBtn").style.display = "none";
-    document.getElementById("profileDropdown").style.display = "inline-block";
-    document.getElementById("profileUsername").innerText =
-        username || shortenAddress(currentAccount);
+  document.getElementById("connectBtn").style.display = "none";
+  document.getElementById("profileDropdown").style.display = "inline-block";
+  document.getElementById("profileUsername").innerText =
+    username || shortenAddress(currentAccount);
 }
 
 function logoutUser() {
-    currentAccount = null;
+  currentAccount = null;
 
-    document.getElementById("connectBtn").style.display = "inline-block";
-    document.getElementById("profileDropdown").style.display = "none";
+  document.getElementById("connectBtn").style.display = "inline-block";
+  document.getElementById("profileDropdown").style.display = "none";
 }
 
 function shortenAddress(address) {
-    return address.slice(0, 6) + "..." + address.slice(-4);
+  return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
 async function checkWalletStatus() {
-    if (!window.ethereum) return;
+  if (!window.ethereum) return;
 
-    web3 = new Web3(window.ethereum);
-    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+  web3 = new Web3(window.ethereum);
+  const accounts = await window.ethereum.request({ method: "eth_accounts" });
 
-    if (accounts.length > 0) {
-        currentAccount = accounts[0];
-        userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
+  if (accounts.length > 0) {
+    currentAccount = accounts[0];
+    userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
 
-        const registered = await userAuthContract.methods.isUserRegistered(currentAccount).call();
-        if (registered) {
-            const userData = await userAuthContract.methods.getUser(currentAccount).call();
-            const username = userData[0];
+    const registered = await userAuthContract.methods.isUserRegistered(currentAccount).call();
+    if (registered) {
+      const userData = await userAuthContract.methods.getUser(currentAccount).call();
+      const username = userData[0];
 
-            document.getElementById("connectBtn").style.display = "none";
-            document.getElementById("profileDropdown").style.display = "inline-block";
-            document.getElementById("profileUsername").innerText = username || shortenAddress(currentAccount);
-        }
+      document.getElementById("connectBtn").style.display = "none";
+      document.getElementById("profileDropdown").style.display = "inline-block";
+      document.getElementById("profileUsername").innerText = username || shortenAddress(currentAccount);
     }
+  }
 }
 
 // expose globally
@@ -1138,3 +1525,7 @@ window.campaignABI = campaignABI;
 window.campaignAddress = campaignAddress;
 window.rewardTokenABI = rewardTokenABI;
 window.rewardTokenAddress = rewardTokenAddress;
+window.fundingABI = fundingABI;
+window.fundingAddress = fundingAddress;
+window.autoRefundABI = autoRefundABI;
+window.autoRefundAddress = autoRefundAddress;

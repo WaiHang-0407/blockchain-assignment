@@ -16,6 +16,14 @@
         <div id="historyList" class="history-list">Loading history...</div>
     </div>
 
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle"></h3>
+            <p id="modalBody"></p>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     <script src="/js/app.js"></script>
     <script>
@@ -33,6 +41,48 @@
             });
 
         let contract;
+
+        async function getCampaignName(id) {
+            try {
+                const campaign = await contract.methods.getCampaign(id).call();
+                return campaign.title; // now returns the actual title
+            } catch {
+                return `Campaign #${id}`;
+            }
+        }
+
+        function shortenAddress(addr) {
+            return addr.slice(0, 6) + "..." + addr.slice(-4);
+        }
+
+        async function viewDetails(action, campaignId, amount, date, actor) {
+            try {
+                const campaign = await contract.methods.getCampaign(campaignId).call();
+
+                document.getElementById("modalTitle").innerText = `${action} Details`;
+                document.getElementById("modalBody").innerHTML = `
+      <strong>Campaign Name:</strong> ${campaign.title}<br>
+      <strong>Description:</strong> ${campaign.description}<br>
+      <strong>ID:</strong> ${campaign.id}<br>
+      <strong>Funds Raised:</strong> ${web3.utils.fromWei(campaign.fundsRaised, "ether")} ETH<br>
+      <strong>Created At:</strong> ${new Date(campaign.createdAt * 1000).toLocaleString()}<br>
+      <strong>Deadline:</strong> ${new Date(campaign.deadline * 1000).toLocaleString()}<br>
+      <strong>Creator:</strong> ${shortenAddress(campaign.creator)}<br><br>
+
+      <strong>Action:</strong> ${action}<br>
+      <strong>Amount:</strong> ${amount} ETH<br>
+      <strong>Date:</strong> ${date}<br>
+      <strong>Executed by:</strong> ${actor}
+    `;
+                document.getElementById("detailsModal").style.display = "block";
+            } catch (err) {
+                console.error("Error fetching campaign details:", err);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("detailsModal").style.display = "none";
+        }
 
         async function loadHistory() {
             web3 = new Web3(window.ethereum);
@@ -80,12 +130,26 @@
                 creatorContributionEvents.push(...contribs);
             }
 
+            // Collect campaign IDs the current account contributed to
+            let contributedCampaignIds = contributionEvents.map(ev => ev.returnValues.campaignId);
+
+            // Fetch withdrawal events for those campaigns
+            let contributedWithdrawEvents = [];
+            for (let id of contributedCampaignIds) {
+                const withdraws = await contract.getPastEvents("FundsWithdrawn", {
+                    filter: { campaignId: id },   // filter by campaignId
+                    fromBlock: 0,
+                    toBlock: "latest"
+                });
+                contributedWithdrawEvents.push(...withdraws);
+            }
+
             // Merge everything
             let allEvents = [
                 ...contributionEvents,
                 ...refundEvents,
-                ...refundCompletedEvents,
-                ...withdrawEvents,
+                ...contributedWithdrawEvents,  // 👈 add withdrawals for campaigns you contributed to
+                ...withdrawEvents,             // creator’s own withdrawals
                 ...createdEvents,
                 ...creatorContributionEvents
             ];
@@ -94,48 +158,73 @@
             allEvents.sort((a, b) => b.returnValues.timestamp - a.returnValues.timestamp);
 
             // Render
+            // Render
             let html = "";
             if (allEvents.length === 0) {
                 html = "<p>No history found.</p>";
             } else {
-                html = "<ul class='history-items'>";
+                html = `
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Campaign Name</th>
+          <th>Amount (ETH)</th>
+          <th>Date</th>
+          <th>Executed by</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
                 for (let ev of allEvents) {
                     const ts = new Date(ev.returnValues.timestamp * 1000).toLocaleString();
-                    let line = "";
+                    let action = "";
+                    let campaignId = ev.returnValues.campaignId || ev.returnValues.id;
+                    let campaignName = await getCampaignName(campaignId);
+                    let amount = "-";
+                    let actor = "";
 
                     switch (ev.event) {
                         case "ContributionMade":
-                            const ethAmount = web3.utils.fromWei(ev.returnValues.amount, "ether");
-                            const tokenAmount = ethAmount; // 1 ETH = 1 RewardToken
+                            action = "Contribution";
+                            amount = web3.utils.fromWei(ev.returnValues.amount, "ether");
+                            actor = shortenAddress(ev.returnValues.contributor);
+                            break;
 
-                            if (ev.returnValues.contributor.toLowerCase() === currentAccount.toLowerCase()) {
-                                line = `You contributed ${ethAmount} ETH to campaign #${ev.returnValues.campaignId} and earned ${tokenAmount} RewardToken(s)`;
-                            } else {
-                                line = `${ev.returnValues.contributor} contributed ${ethAmount} ETH to your campaign #${ev.returnValues.campaignId}`;
-                            }
-                            break;
                         case "RefundIssued":
-                            line = `Refunded ${web3.utils.fromWei(ev.returnValues.amount, "ether")} ETH from campaign #${ev.returnValues.campaignId}`;
+                            action = "Refund";
+                            amount = web3.utils.fromWei(ev.returnValues.amount, "ether");
+                            actor = shortenAddress(ev.returnValues.contributor);
                             break;
-                        case "RefundCompleted":
-                            line = `Campaign #${ev.returnValues.campaignId} failed to reach its goal — all contributors refunded`;
-                            break;
+
                         case "FundsWithdrawn":
-                            if (ev.returnValues.creator.toLowerCase() === currentAccount.toLowerCase()) {
-                                line = `You withdrew ${web3.utils.fromWei(ev.returnValues.amount, "ether")} ETH from campaign #${ev.returnValues.campaignId}`;
-                            } else {
-                                line = `Campaign #${ev.returnValues.campaignId} reached its goal — creator withdrew ${web3.utils.fromWei(ev.returnValues.amount, "ether")} ETH`;
-                            }
+                            action = "Withdrawal";
+                            amount = web3.utils.fromWei(ev.returnValues.amount, "ether");
+                            actor = shortenAddress(ev.returnValues.creator);
                             break;
-                        case "CampaignCreated":
-                            line = `You created campaign #${ev.returnValues.id} (${ev.returnValues.title}) with goal ${web3.utils.fromWei(ev.returnValues.goal, "ether")} ETH`;
-                            break;
+
+                        default:
+                            continue;
                     }
 
-                    html += `<li><span class="timestamp">${ts}</span> — <span class="event">${line}</span></li>`;
+                    html += `
+    <tr>
+      <td>${action}</td>
+      <td>${campaignName}</td>
+      <td>${amount}</td>
+      <td>${ts}</td>
+      <td>${actor}</td>
+      <td><button onclick="viewDetails('${action}', '${campaignId}', '${amount}', '${ts}', '${actor}')">View</button></td>
+    </tr>
+  `;
                 }
-                html += "</ul>";
+
+                html += "</tbody></table>";
             }
+
+            document.getElementById("historyList").innerHTML = html;
 
             document.getElementById("historyList").innerHTML = html;
         }

@@ -69,33 +69,40 @@
                     const fundsRaisedEther = parseFloat(web3.utils.fromWei(c.fundsRaised.toString(), "ether"));
 
                     let statusText = "";
+                    let deleteBtn = "";
 
                     if (c.isRefunded) {
                         statusText = `<p><em>Refunded</em></p>`;
+                        deleteBtn = `<button class="deleteBtn" onclick="event.stopPropagation(); deleteCampaign(${c.id})">Delete</button>`;
                     } else if (c.isWithdrawn) {
                         statusText = `<p><em>Funds Withdrawn</em></p>`;
+                        deleteBtn = `<button class="deleteBtn" onclick="event.stopPropagation(); deleteCampaign(${c.id})">Delete</button>`;
                     } else if (fundsRaisedEther >= goalEther) {
-                        statusText = `<button class="withdrawBtn" onclick="withdraw(${c.id})">Withdraw</button>`;
+                        statusText = `<p><em>Goal Met</em></p>`;
+                    } else if (Date.now() / 1000 < c.deadline && fundsRaisedEther === 0) {
+                        statusText = `<p><em>In Progress</em></p>`;
+                        deleteBtn = `<button class="deleteBtn" onclick="event.stopPropagation(); deleteCampaign(${c.id})">Delete</button>`;
                     } else if (Date.now() / 1000 < c.deadline) {
                         statusText = `<p><em>In Progress</em></p>`;
                     } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther < goalEther) {
-                        if (c.isRefunded) {
-                            statusText = `<p><em>Refunded</em></p>`;
-                        } else {
-                            // Trigger refund automatically
-                            finalizeCampaign(c.id);
-                            statusText = `<p><em>Refund Pending...</em></p>`;
-                        }
+                        // Goal not met - auto refund will handle it
+                        statusText = `<p><em>Auto Refunding...</em></p>`;
                     }
 
+                    const progressPercent = Math.min((fundsRaisedEther / goalEther) * 100, 100);
                     const card = `
         <div class="campaign-card" onclick="viewCampaign(${c.id})">
           <h3>${c.title}</h3>
           <p><strong>Goal:</strong> ${goalEther} ETH</p>
           <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+          </div>
+          <p class="progress-percentage">${progressPercent.toFixed(1)}% funded</p>
           <p><strong>Created At:</strong> ${createdDate}</p>
           <p><strong>Deadline:</strong> ${deadlineDate}</p>
           ${statusText}
+          ${deleteBtn}
         </div>
     `;
                     listDiv.innerHTML += card;
@@ -118,7 +125,6 @@
                     alert(`Funds withdrawn by ${event.returnValues.creator} for ${web3.utils.fromWei(event.returnValues.amount, "ether")} ETH`);
                     loadMyCampaigns(); // refresh UI
                 });
-
         }
 
         function viewCampaign(id) {
@@ -127,25 +133,18 @@
 
         window.addEventListener("load", loadMyCampaigns);
 
-        async function withdraw(id) {
-            try {
-                await contract.methods.withdraw(id).send({ from: currentAccount });
-                alert("Funds withdrawn successfully!");
-                loadMyCampaigns(); // refresh list
-            } catch (err) {
-                console.error(err);
-                alert("Withdrawal failed!");
+        async function deleteCampaign(id) {
+            if (!confirm("Are you sure you want to delete this campaign? This action cannot be undone.")) {
+                return;
             }
-        }
 
-        async function finalizeCampaign(id) {
             try {
-                await contract.methods.finalizeCampaign(id).send({ from: currentAccount });
-                alert("Campaign finalized! Refunds issued or funds withdrawn.");
-                loadMyCampaigns(); // refresh UI
+                await contract.methods.deleteCampaign(id).send({ from: currentAccount });
+                alert("Campaign deleted successfully!");
+                window.location.href = "/html/my-campaigns.html";
             } catch (err) {
                 console.error(err);
-                alert("Finalization failed!");
+                alert("Delete failed: " + err.message);
             }
         }
     </script>

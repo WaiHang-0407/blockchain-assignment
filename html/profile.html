@@ -14,6 +14,15 @@
     <div class="profile-container">
         <h2 class="page-title">My Profile</h2>
         <div id="profileCard" class="profile-card">
+            <!-- Profile Picture Section -->
+            <div class="profile-picture-section">
+                <div class="profile-picture-container">
+                    <img id="profilePicture" src="/images/default-avatar.svg" alt="Profile Picture" class="profile-picture">
+                </div>
+                <button class="edit-picture-btn" onclick="document.getElementById('pictureInput').click()">Change Picture</button>
+                <input type="file" id="pictureInput" accept="image/*" style="display:none;" onchange="uploadProfilePicture(event)">
+            </div>
+
             <p><strong>Username:</strong> <span id="username">Loading...</span></p>
             <p><strong>Wallet Address:</strong> <span id="address">Loading...</span></p>
             <p><strong>ETH Balance:</strong> <span id="ethBalance">Loading...</span></p>
@@ -66,6 +75,32 @@
             const tokenBalance = await rewardTokenContract.methods.balanceOf(currentAccount).call();
             const readableTokens = web3.utils.fromWei(tokenBalance, "ether");
             document.getElementById("tokenBalance").innerText = `${readableTokens} CRT`;
+
+            // Load profile picture from localStorage
+            loadProfilePicture();
+        }
+
+        function uploadProfilePicture(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                // Store in localStorage with wallet address as key
+                localStorage.setItem(`profilePicture_${currentAccount}`, imageData);
+                // Update display
+                document.getElementById("profilePicture").src = imageData;
+                alert("Profile picture updated!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadProfilePicture() {
+            const savedPicture = localStorage.getItem(`profilePicture_${currentAccount}`);
+            if (savedPicture) {
+                document.getElementById("profilePicture").src = savedPicture;
+            }
         }
 
         window.addEventListener("load", loadProfile);

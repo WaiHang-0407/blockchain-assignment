@@ -48,7 +48,6 @@
 
             contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
 
-
             try {
                 const count = await contract.methods.campaignCount().call();
                 console.log("Total campaigns:", count);
@@ -69,31 +68,38 @@
                     const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
                     const goalEther = web3.utils.fromWei(c.goal.toString(), "ether");
                     const fundsRaisedEther = web3.utils.fromWei(c.fundsRaised.toString(), "ether");
+                    const progressPercent = Math.min((fundsRaisedEther / goalEther) * 100, 100);
 
                     let statusText = "";
 
-                    if (Date.now() / 1000 < c.deadline) {
+                    if (c.isRefunded) {
+                        statusText = `<p><em>Refunded</em></p>`;
+                    } else if (c.isWithdrawn) {
+                        statusText = `<p><em>Funds Withdrawn</em></p>`;
+                    } else if (fundsRaisedEther >= goalEther) {
+                        statusText = `<p><em>Goal Met</em></p>`;
+                    } else if (Date.now() / 1000 < c.deadline) {
                         // Deadline not yet reached
                         statusText = `<p><em>In Progress</em></p>`;
-                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther < goalEther) {
-                        // Deadline passed, goal not met
-                        statusText = `<p><em>Refund Available</em></p>`;
-                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther >= goalEther && !c.isWithdrawn) {
+                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther >= goalEther) {
                         // Deadline passed, goal met, not withdrawn yet
                         statusText = `<button id="withdrawBtn" onclick="withdraw(${c.id})">Withdraw</button>`;
-                    } else if (c.isWithdrawn) {
-                        // Already withdrawn
-                        statusText = `<p><em>Funds Withdrawn</em></p>`;
+                    } else if (Date.now() / 1000 >= c.deadline && fundsRaisedEther < goalEther) {
+                        // Deadline passed, goal not met - auto refunding
+                        statusText = `<p><em>Auto Refunding...</em></p>`;
                     }
 
                     const card = `
     <div class="campaign-card" onclick="viewCampaign(${c.id})">
       <h3>${c.title}</h3>
-          <p><strong>Goal:</strong> ${goalEther} ETH</p>
-          <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
-          <p><strong>Created At:</strong> ${createdDate}</p>
-          <p><strong>Deadline:</strong> ${deadlineDate}</p>
-          ${statusText}
+      <p><strong>Goal:</strong> ${goalEther} ETH</p>
+      <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+      </div>
+      <p class="progress-percentage">${progressPercent.toFixed(1)}% funded</p>
+      <p><strong>Deadline:</strong> ${deadlineDate}</p>
+      ${statusText}
     </div>
 `;
                     listDiv.innerHTML += card;
