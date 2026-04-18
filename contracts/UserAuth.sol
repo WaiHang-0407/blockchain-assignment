@@ -14,9 +14,12 @@ contract UserAuth {
     event UserRegistered(address indexed userAddress, string username);
 
     function register(string memory _username) public {
-        require(!users[msg.sender].isRegistered, "Already registered");
-        require(bytes(_username).length > 0, "Username cannot be empty");
-        require(usernameToAddress[_username] == address(0), "Username already taken");
+        require(!users[msg.sender].isRegistered, "User: Already registered");
+        require(bytes(_username).length > 0, "User: Username cannot be empty");
+        
+        if (usernameToAddress[_username] != address(0)) {
+            revert("User: Username already taken");
+        }
 
         users[msg.sender] = User({
             username: _username,
@@ -27,6 +30,10 @@ contract UserAuth {
         usernameToAddress[_username] = msg.sender;
 
         emit UserRegistered(msg.sender, _username);
+        
+        // Final sanity checks
+        assert(users[msg.sender].isRegistered == true);
+        assert(usernameToAddress[_username] == msg.sender);
     }
 
     function isUserRegistered(address _user) public view returns (bool) {
@@ -43,11 +50,17 @@ contract UserAuth {
     }
 
     function deleteAccount() public {
-        require(users[msg.sender].isRegistered, "Not registered");
+        if (!users[msg.sender].isRegistered) {
+            revert("User: Not registered");
+        }
 
         string memory username = users[msg.sender].username;
 
         delete usernameToAddress[username];
         delete users[msg.sender];
+        
+        // Final sanity checks
+        assert(users[msg.sender].isRegistered == false);
+        assert(usernameToAddress[username] == address(0));
     }
 }

@@ -175,6 +175,19 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
+						"name": "_id",
+						"type": "uint256"
+					}
+				],
+				"name": "autoRefund",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
 					},
@@ -345,7 +358,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "finalizeCampaign",
+				"name": "deleteCampaign",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -410,6 +423,77 @@
 						"internalType": "struct Campaign.CampaignData[]",
 						"name": "",
 						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_id",
+						"type": "uint256"
+					}
+				],
+				"name": "getCampaign",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "creator",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "title",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "goal",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "deadline",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "fundsRaised",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isWithdrawn",
+								"type": "bool"
+							},
+							{
+								"internalType": "bool",
+								"name": "isRefunded",
+								"type": "bool"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct Campaign.CampaignData",
+						"name": "",
+						"type": "tuple"
 					}
 				],
 				"stateMutability": "view",
@@ -610,11 +694,11 @@
 			]
 		},
 		"contracts/Campaign.sol": {
-			"keccak256": "0x52ea4f364ac4ac8e7b894ee1d37592a8b4698c6fc01f190c9b9d872f28f297f3",
+			"keccak256": "0xe04fd5aac0693edb78c68f7336bff3bc3f9458c02143dac985ea1dba1d9364f1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0802e9e59068cc65eb753d2c8887795906a5df16033bb5015a1fefa0817decab",
-				"dweb:/ipfs/QmZ6kwxWsXq5wVLMWtRePpxH4HsSNnFqBuBkVv9VHHPYU6"
+				"bzz-raw://f5de81326ed9c19ead1ede9123c698933bb84b3329a10768092b79b3db01a49f",
+				"dweb:/ipfs/QmYJhbn2WLozt7PuktMxoYQbGScPKMaV9tpG37KYgEiViu"
 			]
 		},
 		"contracts/RewardToken.sol": {
