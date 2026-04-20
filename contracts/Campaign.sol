@@ -4,6 +4,9 @@ pragma solidity ^0.8.0;
 import "./RewardToken.sol";
 
 contract Campaign {
+    // --- Voting State ---
+    mapping(uint => mapping(address => bool)) public hasVoted;
+    mapping(uint => uint) public voteCount;
     struct CampaignData {
         uint id;
         address creator;
@@ -201,6 +204,24 @@ contract Campaign {
         );
 
         delete campaigns[_id];
+    }
+
+
+    // --- Voting Functions ---
+    function vote(uint campaignId) public {
+        require(!hasVoted[campaignId][msg.sender], "Already voted");
+        uint8 tier = rewardToken.getTier(msg.sender);
+        require(tier >= 2, "Must be Silver or above to vote");
+        hasVoted[campaignId][msg.sender] = true;
+        if (tier == 3) {
+            voteCount[campaignId] += 2; // Gold counts as 2 votes
+        } else {
+            voteCount[campaignId] += 1; // Silver counts as 1 vote
+        }
+    }
+
+    function getVotes(uint campaignId) public view returns (uint) {
+        return voteCount[campaignId];
     }
 
     // --- View Functions (preserving existing API for JS) ---
