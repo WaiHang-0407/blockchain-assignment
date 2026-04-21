@@ -13,6 +13,25 @@
 
     <div class="container">
         <h2 class="page-title">Active Campaigns</h2>
+        <div class="controls">
+            <label for="sortSelect">Sort by:</label>
+            <select id="sortSelect">
+                <option value="createdDesc">Created (Latest → Oldest)</option>
+                <option value="createdAsc">Created (Oldest → Latest)</option>
+                <option value="deadlineDesc">Deadline (Furthest → Soonest)</option>
+                <option value="deadlineAsc">Deadline (Soonest → Furthest)</option>
+            </select>
+
+            <label for="statusFilter">Filter by status:</label>
+            <select id="statusFilter">
+                <option value="all">All</option>
+                <option value="inProgress">In Progress</option>
+                <option value="goalMet">Goal Met</option>
+                <option value="refunded">Refunded</option>
+                <option value="autoRefunding">Auto Refunding</option>
+            </select>
+        </div>
+
         <div id="campaignList" class="campaign-grid"></div>
     </div>
 
@@ -47,62 +66,86 @@
                 contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
 
                 try {
-                    const campaigns = await contract.methods.getActiveCampaigns().call();
+                    let campaigns = await contract.methods.getActiveCampaigns().call();
+                    campaigns = Array.from(campaigns); // clone to mutable array
+
+                    const sortValue = document.getElementById("sortSelect").value;
+                    campaigns.sort((a, b) => {
+                        if (sortValue === "createdDesc") return Number(b.createdAt) - Number(a.createdAt);
+                        if (sortValue === "createdAsc") return Number(a.createdAt) - Number(b.createdAt);
+                        if (sortValue === "deadlineDesc") return Number(b.deadline) - Number(a.deadline);
+                        if (sortValue === "deadlineAsc") return Number(a.deadline) - Number(b.deadline);
+                    });
+
+
+                    // --- Filtering ---
+                    const filterValue = document.getElementById("statusFilter").value;
+                    const now = Date.now() / 1000;
+                    campaigns = campaigns.filter(c => {
+                        const goalEther = web3.utils.fromWei(c.goal.toString(), "ether");
+                        const fundsRaisedEther = web3.utils.fromWei(c.fundsRaised.toString(), "ether");
+
+                        if (filterValue === "all") return true;
+                        if (filterValue === "refunded") return c.isRefunded;
+                        if (filterValue === "goalMet") return fundsRaisedEther >= goalEther && now < c.deadline;
+                        if (filterValue === "autoRefunding") return now >= c.deadline && fundsRaisedEther < goalEther;
+                        if (filterValue === "inProgress") return now < c.deadline && fundsRaisedEther < goalEther && !c.isRefunded && !c.isWithdrawn;
+                        return true;
+                    });
+
+                    // --- Render ---
                     const listDiv = document.getElementById("campaignList");
                     listDiv.innerHTML = "";
 
                     if (campaigns.length === 0) {
-                        listDiv.innerHTML = "<p id='no-campaigns'>No active campaigns found</p>";
+                        listDiv.innerHTML = "<p id='no-campaigns'>No campaigns found</p>";
                         return;
                     }
 
                     campaigns.forEach(c => {
-                        const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
+                        const createdDate = new Date(c.createdAt * 1000).toLocaleString();
+                        const deadlineDate = new Date(Number(c.deadline) * 1000).toLocaleString();
                         const goalEther = web3.utils.fromWei(c.goal.toString(), "ether");
                         const fundsRaisedEther = web3.utils.fromWei(c.fundsRaised.toString(), "ether");
                         const progressPercent = Math.min((fundsRaisedEther / goalEther) * 100, 100);
 
+                        // status text logic (same as before)
                         let statusText = "";
-                        const now = Date.now() / 1000;
-
-                        if (c.isRefunded) {
-                            statusText = `<p><em>Refunded</em></p>`;
-                        } else if (c.isWithdrawn) {
-                            statusText = `<p><em>Funds Withdrawn</em></p>`;
-                        } else if (now >= c.deadline && fundsRaisedEther >= goalEther) {
-                            statusText = `<button id="withdrawBtn" onclick="withdraw(${c.id})">Withdraw</button>`;
-                        } else if (now >= c.deadline && fundsRaisedEther < goalEther) {
-                            statusText = `<p><em>Auto Refunding...</em></p>`;
-                        } else if (fundsRaisedEther >= goalEther) {
-                            statusText = `<p><em>Goal Met</em></p>`;
-                        } else {
-                            statusText = `<p><em>In Progress</em></p>`;
-                        }
+                        if (c.isRefunded) statusText = `<p><em>Refunded</em></p>`;
+                        else if (now >= c.deadline && fundsRaisedEther >= goalEther) statusText = `<button onclick="withdraw(${c.id})">Withdraw</button>`;
+                        else if (now >= c.deadline && fundsRaisedEther < goalEther) statusText = `<p><em>Auto Refunding...</em></p>`;
+                        else if (fundsRaisedEther >= goalEther) statusText = `<p><em>Goal Met</em></p>`;
+                        else statusText = `<p><em>In Progress</em></p>`;
 
                         listDiv.innerHTML += `
                             <div class="campaign-card" onclick="viewCampaign(${c.id})">
-                                <h3>${c.title}</h3>
-                                <p><strong>Goal:</strong> ${goalEther} ETH</p>
-                                <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
-                                <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
-                                </div>
-                                <p class="progress-percentage">${progressPercent.toFixed(1)}% funded</p>
-                                <p><strong>Deadline:</strong> ${deadlineDate}</p>
-                                ${statusText}
+                            <h3>${c.title}</h3>
+                            <p><strong>Goal:</strong> ${goalEther} ETH</p>
+                            <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+                            </div>
+                            <p class="progress-percentage">${progressPercent.toFixed(1)}% funded</p>
+                                <p><strong>Created:</strong> ${createdDate}</p>
+                            <p><strong>Deadline:</strong> ${deadlineDate}</p>
+                            ${statusText}
                             </div>`;
-                    });
+                        });
                 } catch (err) {
                     console.error("Error loading campaigns:", err);
                     document.getElementById("campaignList").innerText = "Failed to load campaigns!";
                 }
             }
 
+            // Re-run when dropdowns change
+            document.getElementById("sortSelect").addEventListener("change", loadCampaigns);
+            document.getElementById("statusFilter").addEventListener("change", loadCampaigns);
+
             async function withdraw(id) {
                 try {
                     await contract.methods.withdraw(id).send({ from: currentAccount });
                     alert("Funds withdrawn successfully!");
-                    loadCampaigns(); // ✅ fixed: was loadCampaignDetails()
+                    loadCampaigns();
                 } catch (err) {
                     console.error(err);
                     alert("Withdrawal failed!");

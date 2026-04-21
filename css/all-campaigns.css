@@ -90,3 +90,41 @@ body {
     font-size: 30px;
     color: #777;
 }
+
+.controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.controls label {
+    font-weight: 600;
+    color: #333;
+    margin-right: 8px;
+    font-size: 30px;
+}
+
+.controls select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 30px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.controls select:hover {
+    border-color: #007bff;
+}
+
+.controls select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+}

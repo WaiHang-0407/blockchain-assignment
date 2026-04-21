@@ -13,6 +13,26 @@
 
     <div class="container">
         <h2 class="page-title">My Campaigns</h2>
+        <div class="controls">
+            <label for="sortSelect">Sort by:</label>
+            <select id="sortSelect">
+                <option value="createdDesc">Created (Latest → Oldest)</option>
+                <option value="createdAsc">Created (Oldest → Latest)</option>
+                <option value="deadlineDesc">Deadline (Furthest → Soonest)</option>
+                <option value="deadlineAsc">Deadline (Soonest → Furthest)</option>
+            </select>
+
+            <label for="statusFilter">Filter by status:</label>
+            <select id="statusFilter">
+                <option value="all">All</option>
+                <option value="inProgress">In Progress</option>
+                <option value="goalMet">Goal Met</option>
+                <option value="withdrawn">Funds Withdrawn</option>
+                <option value="refunded">Refunded</option>
+                <option value="autoRefunding">Auto Refunding</option>
+            </select>
+        </div>
+
         <div id="myCampaignList" class="campaign-grid"></div>
     </div>
 
@@ -50,17 +70,43 @@
 
                 try {
                     const myCampaigns = await contract.methods.getMyCampaigns(currentAccount).call();
+                    let campaigns = Array.from(myCampaigns); // clone to mutable array
+
+                    // --- Sorting ---
+                    const sortValue = document.getElementById("sortSelect").value;
+                    campaigns.sort((a, b) => {
+                        if (sortValue === "createdDesc") return Number(b.createdAt) - Number(a.createdAt);
+                        if (sortValue === "createdAsc") return Number(a.createdAt) - Number(b.createdAt);
+                        if (sortValue === "deadlineDesc") return Number(b.deadline) - Number(a.deadline);
+                        if (sortValue === "deadlineAsc") return Number(a.deadline) - Number(b.deadline);
+                    });
+
+                    // --- Filtering ---
+                    const filterValue = document.getElementById("statusFilter").value;
+                    const now = Date.now() / 1000;
+                    campaigns = campaigns.filter(c => {
+                        const goalEther = parseFloat(web3.utils.fromWei(c.goal.toString(), "ether"));
+                        const fundsRaisedEther = parseFloat(web3.utils.fromWei(c.fundsRaised.toString(), "ether"));
+
+                        if (filterValue === "all") return true;
+                        if (filterValue === "refunded") return c.isRefunded;
+                        if (filterValue === "withdrawn") return c.isWithdrawn;
+                        if (filterValue === "goalMet") return fundsRaisedEther >= goalEther && now < c.deadline;
+                        if (filterValue === "autoRefunding") return now >= c.deadline && fundsRaisedEther < goalEther;
+                        if (filterValue === "inProgress") return now < c.deadline && fundsRaisedEther < goalEther && !c.isRefunded && !c.isWithdrawn;
+                        return true;
+                    });
+
+                    // --- Render ---
                     const listDiv = document.getElementById("myCampaignList");
                     listDiv.innerHTML = "";
 
-                    if (!myCampaigns.length) {
-                        listDiv.innerHTML = "<p id='no-my-campaigns'>You haven't created any campaigns yet.</p>";
+                    if (campaigns.length === 0) {
+                        listDiv.innerHTML = "<p id='no-my-campaigns'>No campaigns found</p>";
                         return;
                     }
 
-                    const now = Date.now() / 1000;
-
-                    myCampaigns.forEach(c => {
+                    campaigns.forEach(c => {
                         const createdDate = new Date(c.createdAt * 1000).toLocaleString();
                         const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
                         const goalEther = parseFloat(web3.utils.fromWei(c.goal.toString(), "ether"));
@@ -122,6 +168,10 @@
                     document.getElementById("myCampaignList").innerText = "Failed to load campaigns!";
                 }
             }
+
+            // Re-run when dropdowns change
+            document.getElementById("sortSelect").addEventListener("change", loadMyCampaigns);
+            document.getElementById("statusFilter").addEventListener("change", loadMyCampaigns);
 
             async function withdraw(id) {
                 try {

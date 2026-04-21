@@ -1570,13 +1570,6 @@ async function connectWallet() {
   updateUI(username);
 }
 
-function updateUI(username) {
-  document.getElementById("connectBtn").style.display = "none";
-  document.getElementById("profileDropdown").style.display = "inline-block";
-  document.getElementById("profileUsername").innerText =
-    username || shortenAddress(currentAccount);
-}
-
 function logoutUser() {
   currentAccount = null;
   sessionStorage.setItem("manuallyLoggedOut", "true"); // track logout
@@ -1606,9 +1599,18 @@ async function checkWalletStatus() {
       const userData = await userAuthContract.methods.getUser(currentAccount).call();
       const username = userData[0];
 
-      document.getElementById("connectBtn").style.display = "none";
-      document.getElementById("profileDropdown").style.display = "inline-block";
-      document.getElementById("profileUsername").innerText = username || shortenAddress(currentAccount);
+      const connectBtn = document.getElementById("connectBtn");
+      if (connectBtn) {
+        connectBtn.style.display = "none";
+      }
+      const profileDropdown = document.getElementById("profileDropdown");
+      if (profileDropdown) {
+        profileDropdown.style.display = "inline-block";
+      }
+      const profileUsername = document.getElementById("profileUsername");
+      if (profileUsername) {
+        profileUsername.innerText = username || shortenAddress(currentAccount);
+      }
     }
   }
 }

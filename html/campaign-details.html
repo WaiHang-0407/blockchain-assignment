@@ -100,7 +100,7 @@
                         } else if (now >= c.deadline && parseInt(c.fundsRaised) < parseInt(c.goal)) {
                             statusHTML = `<p><em>Auto Refunding...</em></p>`;
                         } else if (parseInt(c.fundsRaised) >= parseInt(c.goal)) {
-                            statusHTML = `<p><em>Goal Met</em></p>`;
+                            statusHTML = `<button onclick="withdraw(${c.id})">Withdraw</button>`;
                         } else {
                             statusHTML = `<p><em>In Progress</em></p>`;
                         }

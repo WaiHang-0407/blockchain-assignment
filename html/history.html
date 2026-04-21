@@ -13,6 +13,22 @@
 
     <div class="history-container">
         <h2 class="page-title">Transaction History</h2>
+        <div class="controls">
+            <label for="sortSelect">Sort by:</label>
+            <select id="sortSelect">
+                <option value="dateDesc">Date (Latest → Oldest)</option>
+                <option value="dateAsc">Date (Oldest → Latest)</option>
+            </select>
+
+            <label for="actionFilter">Filter by action:</label>
+            <select id="actionFilter">
+                <option value="all">All</option>
+                <option value="Contribution">Contribution</option>
+                <option value="Refund">Refund</option>
+                <option value="Withdrawal">Withdrawal</option>
+            </select>
+        </div>
+
         <div id="historyList" class="history-list">Loading history...</div>
     </div>
 
@@ -91,11 +107,10 @@
 
                 contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
 
-                const [contributionEvents, refundEvents, withdrawEvents, createdEvents] = await Promise.all([
+                const [contributionEvents, refundEvents, withdrawEvents] = await Promise.all([
                     contract.getPastEvents("ContributionMade", { filter: { contributor: currentAccount }, fromBlock: 0, toBlock: "latest" }),
                     contract.getPastEvents("RefundIssued", { filter: { contributor: currentAccount }, fromBlock: 0, toBlock: "latest" }),
-                    contract.getPastEvents("FundsWithdrawn", { filter: { creator: currentAccount }, fromBlock: 0, toBlock: "latest" }),
-                    contract.getPastEvents("CampaignCreated", { filter: { creator: currentAccount }, fromBlock: 0, toBlock: "latest" })
+                    contract.getPastEvents("FundsWithdrawn", { filter: { creator: currentAccount }, fromBlock: 0, toBlock: "latest" })
                 ]);
 
                 const myCampaigns = await contract.methods.getMyCampaigns(currentAccount).call();
@@ -108,6 +123,16 @@
                         toBlock: "latest"
                     });
                     creatorContributionEvents.push(...contribs);
+                }
+
+                let creatorRefundEvents = [];
+                for (let c of myCampaigns) {
+                    const refunds = await contract.getPastEvents("RefundIssued", {
+                        filter: { campaignId: c.id }, // filter by campaignId instead of contributor
+                        fromBlock: 0,
+                        toBlock: "latest"
+                    });
+                    creatorRefundEvents.push(...refunds);
                 }
 
                 let contributedCampaignIds = contributionEvents.map(ev => ev.returnValues.campaignId);
@@ -123,14 +148,32 @@
 
                 let allEvents = [
                     ...contributionEvents,
+                    ...creatorRefundEvents,
                     ...refundEvents,
                     ...contributedWithdrawEvents,
                     ...withdrawEvents,
-                    ...createdEvents,
                     ...creatorContributionEvents
                 ];
 
-                allEvents.sort((a, b) => b.returnValues.timestamp - a.returnValues.timestamp);
+                // Sorting
+                const sortValue = document.getElementById("sortSelect").value;
+                allEvents.sort((a, b) => {
+                    if (sortValue === "dateDesc") return b.returnValues.timestamp - a.returnValues.timestamp;
+                    if (sortValue === "dateAsc") return a.returnValues.timestamp - b.returnValues.timestamp;
+                });
+
+                // Filtering
+                const filterValue = document.getElementById("actionFilter").value;
+                allEvents = allEvents.filter(ev => {
+                    let action = "";
+                    switch (ev.event) {
+                        case "ContributionMade": action = "Contribution"; break;
+                        case "RefundIssued": action = "Refund"; break;
+                        case "FundsWithdrawn": action = "Withdrawal"; break;
+                    }
+                    if (filterValue === "all") return true;
+                    return action === filterValue;
+                });
 
                 let html = "";
                 if (allEvents.length === 0) {
@@ -194,6 +237,10 @@
 
                 document.getElementById("historyList").innerHTML = html;
             }
+
+            // Re-run when dropdowns change
+            document.getElementById("sortSelect").addEventListener("change", loadHistory);
+            document.getElementById("actionFilter").addEventListener("change", loadHistory);
 
             window.viewDetails = viewDetails;
             window.closeModal = closeModal;
