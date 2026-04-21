@@ -108,7 +108,7 @@ const userAuthABI = [
     "type": "function"
   }
 ];
-const userAuthAddress = "0xbb164178e053Df88226643A4351a1991f8C22600";
+const userAuthAddress = "0x9A1278636F2Db0C632D0f23a6E7275e3A151D191";
 
 const campaignABI = [
   {
@@ -182,29 +182,6 @@ const campaignABI = [
       }
     ],
     "name": "deleteCampaign",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_contributor",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "markRefunded",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -354,6 +331,29 @@ const campaignABI = [
     "type": "event"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_contributor",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "markRefunded",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -402,6 +402,19 @@ const campaignABI = [
     ],
     "name": "RefundIssued",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "campaignId",
+        "type": "uint256"
+      }
+    ],
+    "name": "vote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -839,6 +852,49 @@ const campaignABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "campaignId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getVotes",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "hasVoted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -887,9 +943,28 @@ const campaignABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "voteCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
-const campaignAddress = "0x451D9D3dF42dB6B2a003e71f372982e261A709De";
+const campaignAddress = "0xEEB21bca629fe172a879460a8994E7f4C5A2FBa2";
 
 const rewardTokenABI = [
   {
@@ -1252,6 +1327,25 @@ const rewardTokenABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getTier",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "name",
     "outputs": [
@@ -1304,7 +1398,7 @@ const rewardTokenABI = [
     "type": "function"
   }
 ];
-const rewardTokenAddress = "0x0e147c76b83f863468bC5356B196070a720d3b90";
+const rewardTokenAddress = "0xdAFe7327FeC0c5a4057A9DAbe8e5CeBfbd184BbC";
 
 const fundingABI = [
   {
@@ -1374,7 +1468,7 @@ const fundingABI = [
     "type": "function"
   }
 ];
-const fundingAddress = "0x8e655EbafD0f2A4567EbeC0c6b1FA2Cb11c3c337";
+const fundingAddress = "0x95D8EcA63eC3b594f0684f21607F1c97C6913fe4";
 
 const autoRefundABI = [
   {
@@ -1440,13 +1534,15 @@ const autoRefundABI = [
     "type": "function"
   }
 ];
-const autoRefundAddress = "0xf29B32e462053108577A8e7d544EDb299d96cF89";
+const autoRefundAddress = "0xa5AB5339a985FF3De1fB60CE01e22973916b6bDE";
 
 async function connectWallet() {
   if (!window.ethereum) {
     alert("MetaMask not detected!");
     return;
   }
+
+  sessionStorage.removeItem("manuallyLoggedOut");
 
   web3 = new Web3(window.ethereum);
 
@@ -1483,6 +1579,8 @@ function updateUI(username) {
 
 function logoutUser() {
   currentAccount = null;
+  sessionStorage.setItem("manuallyLoggedOut", "true"); // track logout
+  window.location.href = "/html/home.html";
 
   document.getElementById("connectBtn").style.display = "inline-block";
   document.getElementById("profileDropdown").style.display = "none";
@@ -1494,6 +1592,7 @@ function shortenAddress(address) {
 
 async function checkWalletStatus() {
   if (!window.ethereum) return;
+  if (sessionStorage.getItem("manuallyLoggedOut") === "true") return;
 
   web3 = new Web3(window.ethereum);
   const accounts = await window.ethereum.request({ method: "eth_accounts" });
@@ -1514,10 +1613,62 @@ async function checkWalletStatus() {
   }
 }
 
+// Pages that require a connected + registered wallet
+async function guardPage() {
+  if (!window.ethereum) {
+    alert("MetaMask is required to access this page.");
+    window.location.href = "/html/home.html";
+    return;
+  }
+
+  if (sessionStorage.getItem("manuallyLoggedOut") === "true") {
+    alert("Please connect your wallet first.");
+    window.location.href = "/html/home.html";
+    return;
+  }
+
+  web3 = new Web3(window.ethereum);
+  const accounts = await window.ethereum.request({ method: "eth_accounts" });
+
+  if (accounts.length === 0) {
+    // Not connected — send to login
+    alert("Please connect your wallet first.");
+    window.location.href = "/html/home.html";
+    return;
+  }
+
+  currentAccount = accounts[0];
+  userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
+
+  const registered = await userAuthContract.methods
+    .isUserRegistered(currentAccount)
+    .call();
+
+  if (!registered) {
+    // Connected but not registered
+    window.location.href = "/html/register.html";
+  }
+}
+
 // expose globally
 window.connectWallet = connectWallet;
 window.logoutUser = logoutUser;
+window.guardPage = guardPage;
 window.addEventListener("load", checkWalletStatus);
+
+if (window.ethereum) {
+  window.ethereum.on("accountsChanged", (accounts) => {
+    if (accounts.length === 0) {
+      sessionStorage.setItem("manuallyLoggedOut", "true");
+      window.location.href = "/html/home.html";
+    } else {
+      // Only reload if user didn't manually log out
+      if (sessionStorage.getItem("manuallyLoggedOut") !== "true") { 
+        window.location.reload();
+      }
+    }
+  });
+}
 
 window.userAuthABI = userAuthABI;
 window.userAuthAddress = userAuthAddress;

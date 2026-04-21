@@ -6,6 +6,7 @@ body {
     align-items: flex-start;
     padding-top: 120px; /* push content down below navbar */
     box-sizing: border-box;
+    display: none; /* Hide content until wallet is connected */
 }
 
 .container {

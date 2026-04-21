@@ -14,13 +14,14 @@
     <div class="profile-container">
         <h2 class="page-title">My Profile</h2>
         <div id="profileCard" class="profile-card">
-            <!-- Profile Picture Section -->
             <div class="profile-picture-section">
                 <div class="profile-picture-container">
-                    <img id="profilePicture" src="/images/default-avatar.svg" alt="Profile Picture" class="profile-picture">
+                    <img id="profilePicture" src="/images/default-avatar.svg" alt="Profile Picture"
+                        class="profile-picture">
                 </div>
                 <button class="edit-picture-btn" onclick="document.getElementById('pictureInput').click()">Change Picture</button>
-                <input type="file" id="pictureInput" accept="image/*" style="display:none;" onchange="uploadProfilePicture(event)">
+                <input type="file" id="pictureInput" accept="image/*" style="display:none;"
+                    onchange="uploadProfilePicture(event)">
             </div>
 
             <p><strong>Username:</strong> <span id="username">Loading...</span></p>
@@ -33,77 +34,70 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     <script src="/js/app.js"></script>
     <script>
-        fetch("/html/navbar.html")
-            .then(res => res.text())
-            .then(data => {
-                document.getElementById("navbar").innerHTML = data;
+        window.addEventListener("load", async () => {
+            await guardPage();
 
-                const connectBtn = document.getElementById("connectBtn");
-                if (connectBtn) {
-                    connectBtn.addEventListener("click", connectWallet);
+            document.body.style.display = "block"; // ✅ reveal after guard passes
+
+            fetch("/html/navbar.html")
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById("navbar").innerHTML = data;
+                    const connectBtn = document.getElementById("connectBtn");
+                    if (connectBtn) connectBtn.addEventListener("click", connectWallet);
+                    checkWalletStatus();
+                });
+
+            async function loadProfile() {
+                if (!web3) web3 = new Web3(window.ethereum);
+
+                const accounts = await window.ethereum.request({ method: "eth_accounts" }); // ✅ no popup
+                currentAccount = accounts[0];
+
+                document.getElementById("address").innerText = currentAccount;
+
+                const balanceWei = await web3.eth.getBalance(currentAccount);
+                document.getElementById("ethBalance").innerText = `${web3.utils.fromWei(balanceWei, "ether")} ETH`;
+
+                const userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
+                try {
+                    const userData = await userAuthContract.methods.getUser(currentAccount).call();
+                    document.getElementById("username").innerText = userData[0] || "(no username set)";
+                } catch (err) {
+                    console.error("Error fetching username:", err);
+                    document.getElementById("username").innerText = "(error)";
                 }
 
-                checkWalletStatus();
-            });
+                const rewardTokenContract = new web3.eth.Contract(window.rewardTokenABI, window.rewardTokenAddress);
+                const tokenBalance = await rewardTokenContract.methods.balanceOf(currentAccount).call();
+                document.getElementById("tokenBalance").innerText = `${web3.utils.fromWei(tokenBalance, "ether")} CRT`;
 
-        async function loadProfile() {
-            // Use the global web3 from app.js
-            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            currentAccount = accounts[0]; // don't redeclare, just assign
-
-            // Wallet address
-            document.getElementById("address").innerText = currentAccount;
-
-            // ETH balance
-            const balanceWei = await web3.eth.getBalance(currentAccount);
-            const balanceEth = web3.utils.fromWei(balanceWei, "ether");
-            document.getElementById("ethBalance").innerText = `${balanceEth} ETH`;
-
-            // Username from UserAuth contract
-            const userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
-            try {
-                const userData = await userAuthContract.methods.getUser(currentAccount).call();
-                const username = userData[0]; // first element of the tuple
-                document.getElementById("username").innerText = username || "(no username set)";
-            } catch (err) {
-                console.error("Error fetching username:", err);
-                document.getElementById("username").innerText = "(error)";
+                loadProfilePicture();
             }
 
-            // RewardToken balance
-            const rewardTokenContract = new web3.eth.Contract(window.rewardTokenABI, window.rewardTokenAddress);
-            const tokenBalance = await rewardTokenContract.methods.balanceOf(currentAccount).call();
-            const readableTokens = web3.utils.fromWei(tokenBalance, "ether");
-            document.getElementById("tokenBalance").innerText = `${readableTokens} CRT`;
+            function uploadProfilePicture(event) {
+                const file = event.target.files[0];
+                if (!file) return;
 
-            // Load profile picture from localStorage
-            loadProfilePicture();
-        }
-
-        function uploadProfilePicture(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imageData = e.target.result;
-                // Store in localStorage with wallet address as key
-                localStorage.setItem(`profilePicture_${currentAccount}`, imageData);
-                // Update display
-                document.getElementById("profilePicture").src = imageData;
-                alert("Profile picture updated!");
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function loadProfilePicture() {
-            const savedPicture = localStorage.getItem(`profilePicture_${currentAccount}`);
-            if (savedPicture) {
-                document.getElementById("profilePicture").src = savedPicture;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imageData = e.target.result;
+                    localStorage.setItem(`profilePicture_${currentAccount}`, imageData);
+                    document.getElementById("profilePicture").src = imageData;
+                    alert("Profile picture updated!");
+                };
+                reader.readAsDataURL(file);
             }
-        }
 
-        window.addEventListener("load", loadProfile);
+            function loadProfilePicture() {
+                const saved = localStorage.getItem(`profilePicture_${currentAccount}`);
+                if (saved) document.getElementById("profilePicture").src = saved;
+            }
+
+            window.uploadProfilePicture = uploadProfilePicture;
+
+            loadProfile(); 
+        });
     </script>
 </body>
 

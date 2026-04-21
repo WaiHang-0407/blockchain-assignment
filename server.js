@@ -4,6 +4,8 @@ const { ethers } = require("ethers");
 
 const app = express();
 
+app.use(express.json());
+
 // Serve everything in project folder
 app.use(express.static(path.join(__dirname)));
 
@@ -13,7 +15,7 @@ app.get("/", (req, res) => {
 
 // Ganache setup
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545");
-const privateKey = "0x054cbfcee1f7d63bb9e33952f6e3cf025eda577a1211ac9426b3a8ba236d63ae";
+const privateKey = "0x1a648402d35e802742343ff55372bfb7204f308835edb5cba74bb432e7126d7a";
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Wrap async logic in a function
@@ -72,8 +74,9 @@ app.listen(port, () => {
 });
 
 // Contract Configuration
-const campaignAddress = "0x451D9D3dF42dB6B2a003e71f372982e261A709De";
-const autoRefundAddress = "0xf29B32e462053108577A8e7d544EDb299d96cF89";
+const campaignAddress = "0xEEB21bca629fe172a879460a8994E7f4C5A2FBa2";
+const autoRefundAddress = "0xa5AB5339a985FF3De1fB60CE01e22973916b6bDE";
+const rewardTokenAddress = "0xdAFe7327FeC0c5a4057A9DAbe8e5CeBfbd184BbC";
 
 // Minimal ABIs needed for server operation
 const campaignABI = [
@@ -101,6 +104,23 @@ const campaignABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256","name": "campaignId","type": "uint256"}],
+    "name": "getVotes",
+    "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+const rewardTokenABI = [
+  {
+    "inputs": [{"internalType": "address","name": "user","type": "address"}],
+    "name": "getTier",
+    "outputs": [{"internalType": "uint8","name": "","type": "uint8"}],
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
 
@@ -113,3 +133,23 @@ const autoRefundABI = [
     "type": "function"
   }
 ];
+
+app.get("/api/votes/:campaignId", async (req, res) => {
+  try {
+    const campaignContract = new ethers.Contract(campaignAddress, campaignABI, provider);
+    const votes = await campaignContract.getVotes(req.params.campaignId);
+    res.json({ campaignId: String(req.params.campaignId), votes: votes.toString() });
+  } catch (err) {
+    res.status(400).json({ error: err?.message ?? String(err) });
+  }
+});
+
+app.get("/api/tier/:address", async (req, res) => {
+  try {
+    const reward = new ethers.Contract(rewardTokenAddress, rewardTokenABI, provider);
+    const tier = await reward.getTier(req.params.address);
+    res.json({ address: String(req.params.address), tier: Number(tier) });
+  } catch (err) {
+    res.status(400).json({ error: err?.message ?? String(err) });
+  }
+});

@@ -36,68 +36,60 @@
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script src="/js/app.js"></script>
   <script>
-    let contract;
+    window.addEventListener("load", async () => {
+      await guardPage();
 
-    fetch("/html/navbar.html")
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById("navbar").innerHTML = data;
+      // Guard passed — show the page
+      document.body.style.display = "block"; // ✅
 
-        const connectBtn = document.getElementById("connectBtn");
-        if (connectBtn) {
-          connectBtn.addEventListener("click", connectWallet);
+      let contract;
+
+      fetch("/html/navbar.html")
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById("navbar").innerHTML = data;
+          const connectBtn = document.getElementById("connectBtn");
+          if (connectBtn) connectBtn.addEventListener("click", connectWallet);
+          checkWalletStatus();
+        });
+
+      async function connectContract() {
+        web3 = new Web3(window.ethereum);
+        currentAccount = (await window.ethereum.request({ method: "eth_accounts" }))[0];
+        contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
+      }
+
+      async function createCampaign() {
+        await connectContract();
+        if (!currentAccount) return;
+
+        const title = document.getElementById("title").value;
+        const description = document.getElementById("description").value;
+        const goalEth = document.getElementById("goal").value;
+        const goalWei = web3.utils.toWei(goalEth, "ether");
+        const deadlineInput = document.getElementById("deadline").value;
+        const deadline = Math.floor(new Date(deadlineInput).getTime() / 1000);
+
+        if (!title || !description || !goalEth || !deadlineInput) { // ✅ fixed: goalEth not goal
+          document.getElementById("status").innerText = "Please fill in all fields!";
+          return;
         }
 
-        checkWalletStatus();
-      });
-
-    async function connectContract() {
-      if (!window.ethereum) {
-        window.location.href = "/html/login.html";
-        return;
-      }
-      web3 = new Web3(window.ethereum);
-      const accounts = await window.ethereum.request({ method: "eth_accounts" });
-      if (!accounts.length) {
-        // no account connected → redirect to login
-        window.location.href = "/html/login.html";
-        return;
-      }
-      currentAccount = accounts[0];
-      contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
-    }
-
-    async function createCampaign() {
-      await connectContract(); // ensures user is connected before creating
-      if (!currentAccount) return; // safety check
-
-      const title = document.getElementById("title").value;
-      const description = document.getElementById("description").value;
-      const goalEth = document.getElementById("goal").value;
-      const goalWei = web3.utils.toWei(goalEth, "ether"); // convert ETH → Wei
-
-      const deadlineInput = document.getElementById("deadline").value;
-      const deadline = Math.floor(new Date(deadlineInput).getTime() / 1000);
-
-      if (!title || !description || !goal || !deadlineInput) {
-        document.getElementById("status").innerText = "Please fill in all fields!";
-        return;
+        try {
+          await contract.methods.createCampaign(title, description, goalWei, deadline).send({
+            from: currentAccount,
+            gas: 3000000
+          });
+          document.getElementById("status").innerText = "Campaign created successfully!";
+          setTimeout(() => { window.location.href = "/html/my-campaigns.html"; }, 2000);
+        } catch (err) {
+          console.error(err);
+          document.getElementById("status").innerText = "Transaction failed!";
+        }
       }
 
-      try {
-        await contract.methods.createCampaign(title, description, goalWei, deadline).send({
-          from: currentAccount,
-          gas: 3000000
-        });
-        document.getElementById("status").innerText = "Campaign created successfully!";
-        setTimeout(() => { window.location.href = "/html/my-campaigns.html"; }, 2000);
-      } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "Transaction failed!";
-      }
-    }
-
-    window.addEventListener("load", connectContract);
+      window.createCampaign = createCampaign;
+    });
   </script>
 </body>
 

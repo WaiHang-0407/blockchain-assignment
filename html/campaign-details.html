@@ -20,132 +20,170 @@
             <input type="number" id="contributionAmount" placeholder="Amount in Ether" />
             <button onclick="contribute()">Contribute</button>
         </div>
+
+        <div class="contribute-section" style="margin-top: 16px;">
+            <h3>Voting</h3>
+            <p id="votesLine"><strong>Votes:</strong> Loading...</p>
+            <p id="tierLine"><strong>Your Tier:</strong> Connect wallet</p>
+            <button id="voteBtn" onclick="vote()" disabled>Vote (Silver+)</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     <script src="/js/app.js"></script>
     <script>
-        let contract;
+        window.addEventListener("load", async () => {
+            await guardPage();
 
-        fetch("/html/navbar.html")
-            .then(res => res.text())
-            .then(data => {
-                document.getElementById("navbar").innerHTML = data;
+            document.body.style.display = "block";
 
-                const connectBtn = document.getElementById("connectBtn");
-                if (connectBtn) {
-                    connectBtn.addEventListener("click", connectWallet);
-                }
-
-                checkWalletStatus();
-            });
-
-        const params = new URLSearchParams(window.location.search);
-        const campaignId = params.get("id");
-
-        async function loadCampaignDetails() {
-            web3 = new Web3(window.ethereum);
-            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            currentAccount = accounts[0];
-            contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
-
-            try {
-                const c = await contract.methods.campaigns(campaignId).call();
-                const createdDate = new Date(c.createdAt * 1000).toLocaleString();
-                const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
-
-                const fundsRaisedEther = web3.utils.fromWei(c.fundsRaised, "ether");
-                const goalEther = web3.utils.fromWei(c.goal, "ether");
-
-                const progressPercent = Math.min((fundsRaisedEther / goalEther) * 100, 100);
-                document.getElementById("campaignDetails").innerHTML = `
-          <h3>${c.title}</h3>
-          <p>${c.description}</p>
-          <p><strong>Goal:</strong> ${goalEther} ETH</p>
-          <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
-          <div class="progress-bar">
-            <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
-          </div>
-          <p class="progress-percentage">${progressPercent.toFixed(1)}% funded</p>
-          <p><strong>Created At:</strong> ${createdDate}</p>
-          <p><strong>Deadline:</strong> ${deadlineDate}</p>
-          <p><strong>Creator:</strong> ${c.creator}</p>
-        `;
-
-                const contributeSection = document.querySelector(".contribute-section");
-
-                if (currentAccount.toLowerCase() === c.creator.toLowerCase()) {
-                    // Creator view
-                    let statusHTML = "";
-                    if (c.isRefunded) {
-                        statusHTML = `<p><em>Refunded</em></p>`;
-                    } else if (c.isWithdrawn) {
-                        statusHTML = `<p><em>Funds Withdrawn</em></p>`;
-                    } else if (parseInt(c.fundsRaised) >= parseInt(c.goal)) {
-                        statusHTML = `<button onclick="withdraw(${c.id})">Withdraw</button>`;
-                    } else if (Date.now() / 1000 < c.deadline) {
-                        statusHTML = `<p><em>In Progress</em></p>`;
-                    } else if (Date.now() / 1000 >= c.deadline && parseInt(c.fundsRaised) < parseInt(c.goal)) {
-                        // Goal not met - auto refund in progress
-                        statusHTML = `<p><em>Auto Refunding...</em></p>`;
-                    }
-                    contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3>${statusHTML}`;
-                } else {
-                    // Contributor view
-                    let statusHTML = "";
-                    if (c.isRefunded) {
-                        statusHTML = `<p><em>Refunded</em></p>`;
-                    } else if (parseInt(c.fundsRaised) >= parseInt(c.goal)) {
-                        statusHTML = `<p><em>Goal Met</em></p>`;
-                    } else if (Date.now() / 1000 < c.deadline) {
-                        // Still active → allow contribution
-                        contributeSection.style.display = "block";
-                        statusHTML = "";
-                    } else if (Date.now() / 1000 >= c.deadline) {
-                        // Deadline passed - auto refund in progress
-                        statusHTML = `<p><em>Auto Refunding...</em></p>`;
-                    }
-                    if (statusHTML) {
-                        contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3>${statusHTML}`;
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById("campaignDetails").innerText = "Failed to load campaign!";
-            }
-        }
-
-        async function withdraw(id) {
-            try {
-                await contract.methods.withdraw(id).send({ from: currentAccount });
-                alert("Funds withdrawn successfully!");
-                loadCampaignDetails(); // refresh
-            } catch (err) {
-                console.error(err);
-                alert("Withdrawal failed!");
-            }
-        }
-
-        async function contribute() {
-            const amount = document.getElementById("contributionAmount").value;
-            try {
-                await contract.methods.contribute(campaignId).send({
-                    from: currentAccount,
-                    value: web3.utils.toWei(amount, "ether")
+            fetch("/html/navbar.html")
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById("navbar").innerHTML = data;
+                    const connectBtn = document.getElementById("connectBtn");
+                    if (connectBtn) connectBtn.addEventListener("click", connectWallet);
+                    checkWalletStatus();
                 });
-                alert("Contribution successful!");
-                
-                // Refresh MetaMask balance
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-                
-                loadCampaignDetails(); // refresh details
-            } catch (err) {
-                console.error(err);
-                alert("Contribution failed!");
-            }
-        }
 
-        window.addEventListener("load", loadCampaignDetails);
+            const params = new URLSearchParams(window.location.search);
+            const campaignId = params.get("id");
+
+            let contract;
+
+            async function loadCampaignDetails() {
+                if (!web3) web3 = new Web3(window.ethereum);
+
+                const accounts = await window.ethereum.request({ method: "eth_accounts" }); // ✅ no popup
+                currentAccount = accounts[0];
+
+                contract = new web3.eth.Contract(window.campaignABI, window.campaignAddress);
+                const rewardToken = new web3.eth.Contract(window.rewardTokenABI, window.rewardTokenAddress);
+
+                try {
+                    const c = await contract.methods.campaigns(campaignId).call();
+                    await refreshVotes();
+                    await refreshTier(rewardToken);
+
+                    const createdDate = new Date(c.createdAt * 1000).toLocaleString();
+                    const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
+                    const fundsRaisedEther = web3.utils.fromWei(c.fundsRaised, "ether");
+                    const goalEther = web3.utils.fromWei(c.goal, "ether");
+                    const progressPercent = Math.min((fundsRaisedEther / goalEther) * 100, 100);
+                    const now = Date.now() / 1000;
+
+                    document.getElementById("campaignDetails").innerHTML = `
+                        <h3>${c.title}</h3>
+                        <p>${c.description}</p>
+                        <p><strong>Goal:</strong> ${goalEther} ETH</p>
+                        <p><strong>Funds Raised:</strong> ${fundsRaisedEther} ETH</p>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+                        </div>
+                        <p class="progress-percentage">${progressPercent.toFixed(1)}% funded</p>
+                        <p><strong>Created At:</strong> ${createdDate}</p>
+                        <p><strong>Deadline:</strong> ${deadlineDate}</p>
+                        <p><strong>Creator:</strong> ${c.creator}</p>
+                    `;
+
+                    const contributeSection = document.querySelector(".contribute-section");
+
+                    if (currentAccount.toLowerCase() === c.creator.toLowerCase()) {
+                        // Creator view
+                        let statusHTML = "";
+                        if (c.isRefunded) {
+                            statusHTML = `<p><em>Refunded</em></p>`;
+                        } else if (c.isWithdrawn) {
+                            statusHTML = `<p><em>Funds Withdrawn</em></p>`;
+                        } else if (now >= c.deadline && parseInt(c.fundsRaised) >= parseInt(c.goal)) {
+                            statusHTML = `<button onclick="withdraw(${c.id})">Withdraw</button>`;
+                        } else if (now >= c.deadline && parseInt(c.fundsRaised) < parseInt(c.goal)) {
+                            statusHTML = `<p><em>Auto Refunding...</em></p>`;
+                        } else if (parseInt(c.fundsRaised) >= parseInt(c.goal)) {
+                            statusHTML = `<p><em>Goal Met</em></p>`;
+                        } else {
+                            statusHTML = `<p><em>In Progress</em></p>`;
+                        }
+                        contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3>${statusHTML}`;
+                    } else {
+                        // Contributor view
+                        if (c.isRefunded) {
+                            contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3><p><em>Refunded</em></p>`;
+                        } else if (now >= c.deadline) {
+                            contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3><p><em>Auto Refunding...</em></p>`;
+                        } else if (parseInt(c.fundsRaised) >= parseInt(c.goal)) {
+                            contributeSection.innerHTML = `<h3 id="statusTitle">Status</h3><p><em>Goal Met</em></p>`;
+                        } else {
+                            contributeSection.style.display = "block"; // still active, show contribute form
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById("campaignDetails").innerText = "Failed to load campaign!";
+                }
+            }
+
+            async function refreshVotes() {
+                const votes = await contract.methods.getVotes(campaignId).call();
+                document.getElementById("votesLine").innerHTML = `<strong>Votes:</strong> ${votes}`;
+            }
+
+            async function refreshTier(rewardToken) {
+                const tier = await rewardToken.methods.getTier(currentAccount).call();
+                renderTier(parseInt(tier));
+            }
+
+            function renderTier(tier) {
+                const label = tier === 3 ? "Gold" : tier === 2 ? "Silver" : tier === 1 ? "Bronze" : "None";
+                document.getElementById("tierLine").innerHTML = `<strong>Your Tier:</strong> ${label} (${tier})`;
+                const btn = document.getElementById("voteBtn");
+                btn.disabled = tier < 2;
+                btn.textContent = tier < 2 ? "Vote (Silver+ required)" : "Vote";
+            }
+
+            async function withdraw(id) {
+                try {
+                    await contract.methods.withdraw(id).send({ from: currentAccount });
+                    alert("Funds withdrawn successfully!");
+                    loadCampaignDetails();
+                } catch (err) {
+                    console.error(err);
+                    alert("Withdrawal failed!");
+                }
+            }
+
+            async function contribute() {
+                const amount = document.getElementById("contributionAmount").value;
+                try {
+                    await contract.methods.contribute(campaignId).send({
+                        from: currentAccount,
+                        value: web3.utils.toWei(amount, "ether")
+                    });
+                    alert("Contribution successful!");
+                    loadCampaignDetails();
+                } catch (err) {
+                    console.error(err);
+                    alert("Contribution failed!");
+                }
+            }
+
+            async function vote() {
+                try {
+                    await contract.methods.vote(campaignId).send({ from: currentAccount });
+                    alert("Vote submitted!");
+                    await refreshVotes();
+                } catch (err) {
+                    console.error(err);
+                    alert(err?.message || "Vote failed!");
+                }
+            }
+
+            window.contribute = contribute;
+            window.withdraw = withdraw;
+            window.vote = vote;
+
+            loadCampaignDetails();
+        });
     </script>
 </body>
 
