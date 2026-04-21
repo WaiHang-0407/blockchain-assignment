@@ -42,14 +42,19 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     <script src="/js/app.js"></script>
     <script>
-        fetch("/html/navbar.html")
-            .then(res => res.text())
-            .then(data => {
-                document.getElementById("navbar").innerHTML = data;
-                const connectBtn = document.getElementById("connectBtn");
-                if (connectBtn) connectBtn.addEventListener("click", connectWallet);
-                checkWalletStatus();
-            });
+        window.addEventListener("load", async () => {
+            document.body.style.display = "block";
+
+            // Always load navbar and connect button
+            fetch("/html/navbar.html")
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById("navbar").innerHTML = data;
+                    const connectBtn = document.getElementById("connectBtn");
+                    if (connectBtn) connectBtn.addEventListener("click", connectWallet);
+                    checkWalletStatus(); // runs even if not registered
+                });
+        });
     </script>
 </body>
 

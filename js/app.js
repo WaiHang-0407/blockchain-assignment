@@ -1566,8 +1566,10 @@ async function connectWallet() {
 
   const userData = await userAuthContract.methods.getUser(currentAccount).call();
   const username = userData[0];
-
-  updateUI(username);
+  document.getElementById("connectBtn").style.display = "none";
+  document.getElementById("profileDropdown").style.display = "inline-block";
+  document.getElementById("profileUsername").innerText =
+    username || shortenAddress(currentAccount);
 }
 
 function logoutUser() {
@@ -1592,25 +1594,20 @@ async function checkWalletStatus() {
 
   if (accounts.length > 0) {
     currentAccount = accounts[0];
-    userAuthContract = new web3.eth.Contract(window.userAuthABI, window.userAuthAddress);
+
+    // ✅ FIX HERE
+    userAuthContract = new web3.eth.Contract(userAuthABI, userAuthAddress);
 
     const registered = await userAuthContract.methods.isUserRegistered(currentAccount).call();
+
     if (registered) {
       const userData = await userAuthContract.methods.getUser(currentAccount).call();
       const username = userData[0];
 
-      const connectBtn = document.getElementById("connectBtn");
-      if (connectBtn) {
-        connectBtn.style.display = "none";
-      }
-      const profileDropdown = document.getElementById("profileDropdown");
-      if (profileDropdown) {
-        profileDropdown.style.display = "inline-block";
-      }
-      const profileUsername = document.getElementById("profileUsername");
-      if (profileUsername) {
-        profileUsername.innerText = username || shortenAddress(currentAccount);
-      }
+      document.getElementById("connectBtn").style.display = "none";
+      document.getElementById("profileDropdown").style.display = "inline-block";
+      document.getElementById("profileUsername").innerText =
+        username || shortenAddress(currentAccount);
     }
   }
 }
@@ -1665,7 +1662,7 @@ if (window.ethereum) {
       window.location.href = "/html/home.html";
     } else {
       // Only reload if user didn't manually log out
-      if (sessionStorage.getItem("manuallyLoggedOut") !== "true") { 
+      if (sessionStorage.getItem("manuallyLoggedOut") !== "true") {
         window.location.reload();
       }
     }
