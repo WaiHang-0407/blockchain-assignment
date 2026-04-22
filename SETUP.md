@@ -61,8 +61,10 @@ The contracts are independent; you must manually "plug" them together using thes
 ### 1. Backend (`server.js`)
 Open `server.js` and update the following lines with your newly deployed addresses:
 ```javascript
+const privateKey = "YOUR_PRIVATE_KEY";
 const campaignAddress = "YOUR_CAMPAIGN_ADDRESS";
 const autoRefundAddress = "YOUR_AUTOREFUND_ADDRESS";
+const rewardTokenAddress = "YOUR_REWARDTOKEN_ADDRESS";
 ```
 
 ### 2. Frontend (`js/app.js`)
