@@ -21,12 +21,6 @@
             <button onclick="contribute()">Contribute</button>
         </div>
 
-        <div class="contribute-section" style="margin-top: 16px;">
-            <h3>Voting</h3>
-            <p id="votesLine"><strong>Votes:</strong> Loading...</p>
-            <p id="tierLine"><strong>Your Tier:</strong> Connect wallet</p>
-            <button id="voteBtn" onclick="vote()" disabled>Vote (Silver+)</button>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
@@ -62,8 +56,6 @@
 
                 try {
                     const c = await contract.methods.campaigns(campaignId).call();
-                    await refreshVotes();
-                    await refreshTier(rewardToken);
 
                     const createdDate = new Date(c.createdAt * 1000).toLocaleString();
                     const deadlineDate = new Date(c.deadline * 1000).toLocaleString();
@@ -123,23 +115,8 @@
                 }
             }
 
-            async function refreshVotes() {
-                const votes = await contract.methods.getVotes(campaignId).call();
-                document.getElementById("votesLine").innerHTML = `<strong>Votes:</strong> ${votes}`;
-            }
 
-            async function refreshTier(rewardToken) {
-                const tier = await rewardToken.methods.getTier(currentAccount).call();
-                renderTier(parseInt(tier));
-            }
 
-            function renderTier(tier) {
-                const label = tier === 3 ? "Gold" : tier === 2 ? "Silver" : tier === 1 ? "Bronze" : "None";
-                document.getElementById("tierLine").innerHTML = `<strong>Your Tier:</strong> ${label} (${tier})`;
-                const btn = document.getElementById("voteBtn");
-                btn.disabled = tier < 2;
-                btn.textContent = tier < 2 ? "Vote (Silver+ required)" : "Vote";
-            }
 
             async function withdraw(id) {
                 try {
@@ -167,20 +144,11 @@
                 }
             }
 
-            async function vote() {
-                try {
-                    await contract.methods.vote(campaignId).send({ from: currentAccount });
-                    alert("Vote submitted!");
-                    await refreshVotes();
-                } catch (err) {
-                    console.error(err);
-                    alert(err?.message || "Vote failed!");
-                }
-            }
+
 
             window.contribute = contribute;
             window.withdraw = withdraw;
-            window.vote = vote;
+    
 
             loadCampaignDetails();
         });

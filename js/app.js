@@ -108,7 +108,7 @@ const userAuthABI = [
     "type": "function"
   }
 ];
-const userAuthAddress = "0x9A1278636F2Db0C632D0f23a6E7275e3A151D191";
+const userAuthAddress = "0xdE87455f6dcb580dcD40D297dA5E416c8ECA9848";
 
 const campaignABI = [
   {
@@ -964,7 +964,7 @@ const campaignABI = [
     "type": "function"
   }
 ];
-const campaignAddress = "0xEEB21bca629fe172a879460a8994E7f4C5A2FBa2";
+const campaignAddress = "0xfbfb0a6b29e206Dde9D660713A6aAbc7a64a0f95";
 
 const rewardTokenABI = [
   {
@@ -1398,7 +1398,7 @@ const rewardTokenABI = [
     "type": "function"
   }
 ];
-const rewardTokenAddress = "0xdAFe7327FeC0c5a4057A9DAbe8e5CeBfbd184BbC";
+const rewardTokenAddress = "0x4bD5096A51C75319B8Cc7679177c070E2e3875f1";
 
 const fundingABI = [
   {
@@ -1468,7 +1468,7 @@ const fundingABI = [
     "type": "function"
   }
 ];
-const fundingAddress = "0x95D8EcA63eC3b594f0684f21607F1c97C6913fe4";
+const fundingAddress = "0x449D78B14C68d0bab16fa039a340951847Bdda2b";
 
 const autoRefundABI = [
   {
@@ -1534,7 +1534,7 @@ const autoRefundABI = [
     "type": "function"
   }
 ];
-const autoRefundAddress = "0xa5AB5339a985FF3De1fB60CE01e22973916b6bDE";
+const autoRefundAddress = "0xEC5D21849FaEad5f20d1E086193Ec7859064BD10";
 
 async function connectWallet() {
   if (!window.ethereum) {

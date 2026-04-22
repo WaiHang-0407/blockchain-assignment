@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 
 // Ganache setup
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545");
-const privateKey = "0x1a648402d35e802742343ff55372bfb7204f308835edb5cba74bb432e7126d7a";
+const privateKey = "0x62baa4b7d3db06020c39394da745399d4aaf0f16b9d9607c7d4c6a845ea68475";
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Wrap async logic in a function
@@ -74,9 +74,9 @@ app.listen(port, () => {
 });
 
 // Contract Configuration
-const campaignAddress = "0xEEB21bca629fe172a879460a8994E7f4C5A2FBa2";
-const autoRefundAddress = "0xa5AB5339a985FF3De1fB60CE01e22973916b6bDE";
-const rewardTokenAddress = "0xdAFe7327FeC0c5a4057A9DAbe8e5CeBfbd184BbC";
+const campaignAddress = "0xfbfb0a6b29e206Dde9D660713A6aAbc7a64a0f95";
+const autoRefundAddress = "0xEC5D21849FaEad5f20d1E086193Ec7859064BD10";
+const rewardTokenAddress = "0x4bD5096A51C75319B8Cc7679177c070E2e3875f1";
 
 // Minimal ABIs needed for server operation
 const campaignABI = [
