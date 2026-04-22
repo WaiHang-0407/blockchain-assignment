@@ -17,18 +17,5 @@ contract RewardToken is ERC20, Ownable {
         assert(balanceOf(to) == beforeBalance + amount);
     }
 
-    // Returns 0 = None, 1 = Bronze, 2 = Silver, 3 = Gold
-    // Demo-friendly thresholds: raw token units (no 1e18 multiplier)
-    function getTier(address user) public view returns (uint8) {
-        uint256 bal = balanceOf(user);
-        if (bal >= 500) {
-            return 3;
-        } else if (bal >= 100) {
-            return 2;
-        } else if (bal >= 1) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
+
 }
